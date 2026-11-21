@@ -123,7 +123,7 @@ function renderMenu() {
   if (!dishes.length) return;
   const host = dishes.filter((d) => d.category === 'host');
   let html = `<section class="course"><div class="course-head"><h3>From Danny &amp; Barb’s Kitchen</h3></div><ul class="dishes">${host.map((d) =>
-    `<li><div class="dish-row host"><span class="nm"><b>${esc(pretty(d.name))}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</span><span class="lead"></span><span class="st"><span class="who">${HOST_COOK(d)}</span></span></div></li>`).join('')}</ul></section>`;
+    `<li><div class="dish-row host"><b class="nm">${esc(pretty(d.name))}</b><span class="lead"></span><span class="st"><span class="who"><span class="p">${HOST_COOK(d)}</span></span></span>${d.hint ? `<small class="hint">${esc(d.hint)}</small>` : ''}</div></li>`).join('')}</ul></section>`;
   html += COURSES.map(([id, name, kick]) => {
     const list = dishes.filter((d) => d.category === id);
     return `<section class="course"><div class="course-head"><h3>${name}</h3></div><p class="course-sub">${esc(kick)}</p>
@@ -133,17 +133,21 @@ function renderMenu() {
   $('cats').innerHTML = html;
 }
 
+// Same person signing up twice shows once, with a count: "The Jacob Forciers ×2".
+function groupWho(list) {
+  const m = new Map();
+  list.forEach((x) => { const k = x.who.trim().toLowerCase(); const e = m.get(k); if (e) e[1]++; else m.set(k, [x.who.trim(), 1]); });
+  return [...m.values()];
+}
 function dishRow(d) {
   const s = signsFor(d), n = s.length, full = d.target && n >= d.target;
-  let st;
-  if (!n) st = '<span class="open">Open</span>';
-  else {
-    st = `<span class="who">${s.map((x) => esc(x.who)).join(', ')}</span>`;
-    if (d.target) st += `<span class="n">${full ? 'Covered' : `${n} of ${d.target}`}</span>`;
-  }
+  const who = n
+    ? `<span class="who">${groupWho(s).map(([w, k]) => `<span class="p">${esc(w)}${k > 1 ? `<span class="x2">×${k}</span>` : ''}</span>`).join(', ')}</span>`
+    : '<span class="who open">Open</span>';
+  const count = n && d.target ? `<span class="n">${full ? 'Covered' : `${n} of ${d.target}`}</span>` : '';
   const sub = [d.hint, d.added_by && !n ? `added by ${d.added_by}` : ''].filter(Boolean).join(' · ');
   return `<li><button type="button" class="dish-row ${full ? 'full' : ''}" data-dish="${d.id}">
-    <span class="nm"><b>${esc(pretty(d.name))}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</span><span class="lead"></span><span class="st">${st}</span></button></li>`;
+    <b class="nm">${esc(pretty(d.name))}</b><span class="lead"></span><span class="st">${who}${count}</span>${sub ? `<small class="hint">${esc(sub)}</small>` : ''}</button></li>`;
 }
 
 $('cats').addEventListener('click', (e) => {
