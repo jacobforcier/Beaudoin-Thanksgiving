@@ -182,12 +182,20 @@ async function dishDialog(d) {
   const acts = [{ label: 'Close', value: null, cls: 'ghost' }];
   if (d.added_by && !n) acts.push({ label: 'Remove dish', value: 'delete', cls: 'warn' });
   acts.push({ label: n ? 'I’ll bring one too' : 'I’ll bring it', value: 'ok', submit: true });
-  const status = d.target ? (n >= d.target ? 'Covered, but doubles are welcome' : `${word(n)} of ${word(d.target)} so far`) : '';
+  const status = d.target ? (n >= d.target ? 'Covered, but doubles are welcome' : n ? `${word(n)} of ${word(d.target)} so far` : `${word(d.target)} needed`) : '';
   const p = openDialog(pretty(d.name),
     `<p class="dlg-note">${[d.hint, status].filter(Boolean).map((x) => esc(cap(x))).join(' · ') || 'Tap below to bring it.'}</p>
      ${n ? `<ul class="dlg-who">${s.map((x) => `<li><button type="button" data-s="${x.id}"><b>${esc(x.who)}</b><i>${esc(x.note || '')}</i><span class="edit">Edit</span></button></li>`).join('')}</ul>` : ''}
-     <div class="dlg-fields">${field('Your name', 'dName', myName(), 'e.g. Jeff & Sue', true)}${field('Note', 'dNote', '', 'optional, e.g. homemade', false, 80)}</div>${panTip(d.category)}`, acts);
+     <div class="dlg-fields">${field('Your name', 'dName', myName(), 'e.g. Jeff & Sue', true)}
+       <div class="stepper qty"><span class="caps">How many</span><button type="button" data-q="-1" aria-label="Fewer">−</button><output id="dQty">1</output><button type="button" data-q="1" aria-label="More">+</button></div>
+       ${field('Note', 'dNote', '', 'optional, e.g. homemade', false, 80)}</div>${panTip(d.category)}`, acts);
   $('dlgBody').querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => { edit = b.dataset.s; dlg.close(); }));
+  const okBtn = $('dlgActions').querySelector('button:last-child'), okLabel = okBtn.textContent;
+  $('dlgBody').querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => {
+    const q = Math.max(1, Math.min(4, +$('dQty').textContent + +b.dataset.q));
+    $('dQty').textContent = q;
+    okBtn.textContent = q > 1 ? `I’ll bring ${word(q)}` : okLabel;
+  }));
   const r = await p;
   if (edit) return signupDialog(signups.find((x) => x.id === edit));
   if (r === 'delete') {
@@ -198,9 +206,10 @@ async function dishDialog(d) {
   const who = r === 'ok' && $('dName').value.trim();
   if (!who) return;
   store.set('tgName', who);
-  const { error } = await T_SIGN.insert({ dish_id: d.id, who, note: $('dNote').value.trim() || null });
+  const qty = +$('dQty').textContent || 1, note = $('dNote').value.trim() || null;
+  const { error } = await T_SIGN.insert(Array.from({ length: qty }, () => ({ dish_id: d.id, who, note })));
   if (error) return toast('That didn’t save. Please try again.');
-  toast(`Thank you, ${who}. ${pretty(d.name)} is on the table.`);
+  toast(`Thank you, ${who}. ${pretty(d.name)}${qty > 1 ? ` ×${qty}` : ''} is on the table.`);
   load();
 }
 
