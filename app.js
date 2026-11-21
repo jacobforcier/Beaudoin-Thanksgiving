@@ -418,7 +418,7 @@ $('tBody').addEventListener('input', grow);
 let hereNow = 0; // other people on the page right now (live presence)
 function renderDate() {
   const n = daysUntil();
-  $('countdown').textContent = (n === 0 ? (Date.now() < ARRIVE ? 'Happy Thanksgiving · see you at 1:30' : 'Happy Thanksgiving')
+  $('countdown').textContent = (n === 0 ? (Date.now() < ARRIVE ? 'Happy Thanksgiving · see you at 1' : 'Happy Thanksgiving')
     : n < 0 ? 'Thank you for a wonderful Thanksgiving'
     : n === 1 ? 'Tomorrow' : `${word(n)} days to go`)
     + (hereNow > 0 ? ` · ${word(hereNow)} ${hereNow === 1 ? 'other' : 'others'} here now` : '');
@@ -436,14 +436,14 @@ $('directions').href = isApple
   : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ADDRESS)}`;
 const GCAL = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
   + '&text=' + encodeURIComponent('Beaudoin Family Thanksgiving')
-  + '&dates=20261126T183000Z/20261127T000000Z'
+  + '&dates=20261126T180000Z/20261127T000000Z'
   + '&location=' + encodeURIComponent(ADDRESS)
-  + '&details=' + encodeURIComponent('Thanksgiving at Danny & Barb’s. Arrive at 1:30.\nSign-ups: ' + location.origin + location.pathname);
+  + '&details=' + encodeURIComponent('Thanksgiving at Danny & Barb’s. Arrive at 1 pm.\nSign-ups: ' + location.origin + location.pathname);
 $('calBtn').addEventListener('click', () => {
   const apple = `<a class="btn ${isApple ? '' : 'ghost'}" href="thanksgiving.ics">Apple or Outlook calendar</a>`;
   const google = `<a class="btn ${isApple ? 'ghost' : ''}" href="${GCAL}" target="_blank" rel="noopener">Google Calendar</a>`;
   openDialog('Add to your calendar',
-    `<p class="dlg-note">Thursday, November 26, 1:30 pm at Danny & Barb’s, 1 Leonard Lane, Wilmington. Includes a reminder the day before.</p>
+    `<p class="dlg-note">Thursday, November 26, 1 pm at Danny & Barb’s, 1 Leonard Lane, Wilmington. Includes a reminder the day before.</p>
      <div class="cal-opts">${isApple ? apple + google : google + apple}</div>`,
     [{ label: 'Close', value: null, cls: 'ghost' }]);
   $('dlgBody').querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setTimeout(() => dlg.close(), 300)));

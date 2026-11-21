@@ -6,11 +6,11 @@ METHOD:PUBLISH
 BEGIN:VEVENT
 UID:beaudoin-thanksgiving-2026@jacobforcier.github.io
 DTSTAMP:20261121T120000Z
-DTSTART:20261126T183000Z
+DTSTART:20261126T180000Z
 DTEND:20261127T000000Z
 SUMMARY:🦃 Beaudoin Family Thanksgiving
 LOCATION:1 Leonard Lane\, Wilmington\, MA 01887
-DESCRIPTION:Thanksgiving at Danny & Barb's. Arrive at 1:30. Sign-ups: https://jacobforcier.github.io/Beaudoin-Thanksgiving/
+DESCRIPTION:Thanksgiving at Danny & Barb's. Arrive at 1 pm. Sign-ups: https://jacobforcier.github.io/Beaudoin-Thanksgiving/
 URL:https://jacobforcier.github.io/Beaudoin-Thanksgiving/
 BEGIN:VALARM
 ACTION:DISPLAY

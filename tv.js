@@ -38,7 +38,7 @@ function slides() {
   const { dishes, signups, rsvps, thanks } = data, out = [];
   const days = etToday();
   out.push({ kind: 'title', html: `<p class="eyebrow">The Beaudoin Family</p><hr class="rule"><h1>Thanksgiving</h1>
-    <p class="big">${days === 0 ? 'Happy Thanksgiving' : 'Thursday, November 26, 1:30 pm'} · at Danny &amp; Barb’s</p>
+    <p class="big">${days === 0 ? 'Happy Thanksgiving' : 'Thursday, November 26, 1 pm'} · at Danny &amp; Barb’s</p>
     <p class="soft">${days > 1 ? `${cap(spell(days))} days to go` : days === 1 ? 'Tomorrow' : 'So glad you’re here'}</p>` });
   const n = rsvps.reduce((s, r) => s + r.adults + r.kids, 0);
   if (rsvps.length) out.push({ kind: 'guests', html: `<p class="kicker">Around the table</p><h2>${cap(spell(n))} at the table</h2>
