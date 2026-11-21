@@ -91,74 +91,31 @@ function renderAll(animate = false) {
 const signsFor = (d) => signups.filter((s) => s.dish_id === d.id);
 const courseNeeds = () => dishes.filter((x) => !x.locked && x.target && PAN_CATS.includes(x.category));
 
-/* ---------- the table ---------- */
-// Seen from above: a chair fills and a place is set for each guest; each dish signed up lands on the runner.
-const FOOD = { sides: '#b0812f', desserts: '#7a4a2a', extras: '#6f7d4e', host: '#7a4a2a' };
+/* ---------- the status: who's at the table, what's still needed ---------- */
+const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+const spell = (n) => n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '') : String(n);
 function renderMeter(animate) {
-  const A = rsvps.reduce((s, r) => s + r.adults, 0), K = rsvps.reduce((s, r) => s + r.kids, 0), n = A + K;
-  const W = 600, H = 220, ty0 = 58, ty1 = 178, cy = (ty0 + ty1) / 2;
-  const perSide = Math.min(16, Math.max(6, Math.ceil(Math.max(0, n - 2) / 2)));
-  const sx0 = 88, sx1 = 512, step = (sx1 - sx0) / (perSide - 1);
-  const seats = [{ x: 26, y: cy, end: 'l' }, { x: 574, y: cy, end: 'r' }];
-  const mid = (perSide - 1) / 2;
-  [...Array(perSide).keys()].sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b)
-    .forEach((c) => { seats.push({ x: sx0 + c * step, y: 38, side: 't' }); seats.push({ x: sx0 + c * step, y: 198, side: 'b' }); });
-  const delay = (i, base, per) => animate ? `style="transition-delay:${(base + i * per).toFixed(2)}s"` : '';
-  let chairs = '', places = '';
-  seats.forEach((s, i) => {
-    const on = i < n;
-    chairs += s.end
-      ? `<rect class="chair ${on ? 'filled' : ''}" x="${s.x - 9}" y="${s.y - 16}" width="18" height="32" rx="4"/>`
-      : `<rect class="chair ${on ? 'filled' : ''}" x="${s.x - 14}" y="${s.y - 9}" width="28" height="18" rx="4"/>`;
-    const px = s.end === 'l' ? 68 : s.end === 'r' ? 532 : s.x;
-    const py = s.end ? s.y : s.side === 't' ? 76 : 160;
-    const rot = s.end === 'l' ? -90 : s.end === 'r' ? 90 : s.side === 'b' ? 180 : 0;
-    places += `<g class="setting ${animate ? '' : (on ? 'on' : '')}" data-on="${on ? 1 : 0}" ${delay(i, 0, 0.04)} transform="translate(${px} ${py}) rotate(${rot})">
-      <g class="pop"><path class="cutlery" d="M-15 -6 V8 M-17 -6 V-1 M-13 -6 V-1 M15 -6 V8"/><circle r="9.5" class="plate"/><circle r="6" class="plate-in"/></g></g>`;
-  });
-  const host = dishes.filter((x) => x.locked && !/turkey/i.test(x.name));
-  const brought = signups.map((s) => dishes.find((x) => x.id === s.dish_id)).filter(Boolean);
-  const onRunner = [...host, ...brought];
-  const slots = [];
-  for (let k = 0; k < 7; k++) for (const side of [-1, 1]) for (const row of [0, 1]) slots.push({ x: 300 + side * (68 + k * 24), y: row ? 129 : 107 });
-  const shown = onRunner.slice(0, slots.length), extra = onRunner.length - shown.length;
-  const food = shown.map((x, i) => {
-    const pie = x.category === 'desserts' || x.locked;
-    return `<g class="dish ${animate ? '' : 'on'}" ${delay(i, 0.45, 0.05)} transform="translate(${slots[i].x} ${slots[i].y})"><g class="pop">
-      <circle r="9.5" fill="#fffdf8" stroke="#2a1f17" stroke-width=".8"/><circle r="6.2" fill="${FOOD[x.category]}"/>
-      ${pie ? '<path d="M-4 -3 H4 M-5 0 H5 M-4 3 H4 M-3 -4.5 V4.5 M0 -5.5 V5.5 M3 -4.5 V4.5" stroke="#e9c98f" stroke-width=".7"/>' : '<circle r="2.2" cx="-1.5" cy="-1.5" fill="#fff" opacity=".35"/>'}
-    </g></g>`;
-  }).join('') + (extra > 0 ? `<text x="${300 + 68 + 7 * 24 + 4}" y="${cy}" class="caps" fill="#f4ede0" font-size="10" dominant-baseline="central">+${extra}</text>` : '');
-  const need = courseNeeds(), covered = need.filter((x) => signsFor(x).length >= x.target).length;
-
-  $('meter').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${n} guests, ${signups.length} dishes signed up">
-    <defs><radialGradient id="glow"><stop offset="0" stop-color="#f2c46b" stop-opacity=".8"/><stop offset="1" stop-color="#f2c46b" stop-opacity="0"/></radialGradient></defs>
-    ${chairs}
-    <rect x="48" y="${ty0}" width="504" height="${ty1 - ty0}" rx="5" fill="#ebe1cf" stroke="#2a1f17" stroke-width="1.2"/>
-    <rect x="54" y="${ty0 + 6}" width="492" height="${ty1 - ty0 - 12}" rx="3" fill="none" stroke="#cdbfa8" stroke-width=".8"/>
-    <rect x="72" y="95" width="456" height="46" fill="#8e2a2e"/>
-    <path d="M72 99.5 H528 M72 136.5 H528" stroke="#f4ede0" stroke-width=".8" stroke-dasharray="3 2.5" opacity=".7"/>
-    ${places}
-    <circle cx="246" cy="118" r="17" fill="url(#glow)" class="glow"/><circle cx="354" cy="118" r="17" fill="url(#glow)" class="glow"/>
-    <rect x="242" y="112" width="8" height="15" rx="1.5" fill="#fffdf8" stroke="#2a1f17" stroke-width=".7"/><path class="flame" d="M246 102 q4.5 5.5 0 9.5 q-4.5 -4 0 -9.5z" fill="#d9a441"/>
-    <rect x="350" y="112" width="8" height="15" rx="1.5" fill="#fffdf8" stroke="#2a1f17" stroke-width=".7"/><path class="flame b" d="M354 102 q4.5 5.5 0 9.5 q-4.5 -4 0 -9.5z" fill="#d9a441"/>
-    <ellipse cx="300" cy="118" rx="36" ry="21" fill="#fffdf8" stroke="#2a1f17" stroke-width="1"/>
-    <ellipse cx="300" cy="118" rx="29" ry="15.5" fill="none" stroke="#b0812f" stroke-width=".7"/>
-    <g transform="translate(300 118)">
-      <ellipse cx="-17" cy="-6" rx="7" ry="4" transform="rotate(-25 -17 -6)" fill="#9a5b2a" stroke="#5a3b26" stroke-width=".7"/><circle cx="-23" cy="-9" r="2.4" fill="#fffdf8" stroke="#5a3b26" stroke-width=".6"/>
-      <ellipse cx="-17" cy="6" rx="7" ry="4" transform="rotate(25 -17 6)" fill="#9a5b2a" stroke="#5a3b26" stroke-width=".7"/><circle cx="-23" cy="9" r="2.4" fill="#fffdf8" stroke="#5a3b26" stroke-width=".6"/>
-      <ellipse cx="2" cy="0" rx="17" ry="11.5" fill="#b0702f" stroke="#5a3b26" stroke-width=".8"/>
-      <ellipse cx="4" cy="-4" rx="9" ry="4.5" fill="#d9a05a" opacity=".55"/>
-    </g>
-    ${food}
-  </svg>
-  <p class="tally">${rsvps.length || signups.length
-    ? `<b>${n}</b> ${n === 1 ? 'guest' : 'guests'}<span class="sep">·</span><b>${signups.length}</b> ${signups.length === 1 ? 'dish' : 'dishes'}<span class="sep">·</span><b>${covered}</b> of ${need.length} sides &amp; desserts covered`
-    : 'The table is set and waiting for its first guests.'}</p>`;
-  if (animate) requestAnimationFrame(() => setTimeout(() => {
-    $('meter').querySelectorAll('.setting[data-on="1"], .dish').forEach((el) => el.classList.add('on'));
-  }, reduced ? 0 : 200));
+  const n = rsvps.reduce((s, r) => s + r.adults + r.kids, 0);
+  const onTable = dishes.filter((d) => d.locked).length + signups.length;
+  const needed = courseNeeds().filter((d) => signsFor(d).length < d.target);
+  const head = n
+    ? `<p class="headline">${cap(spell(n))} at the table</p><p class="subline">and ${spell(onTable)} ${onTable === 1 ? 'dish' : 'dishes'} on it</p>`
+    : `<p class="headline">Pull up a chair</p><p class="subline">${spell(onTable)} ${onTable === 1 ? 'dish' : 'dishes'} on the table so far</p>`;
+  const shown = needed.slice(0, 6), more = needed.length - shown.length;
+  const need = needed.length
+    ? `<p class="needed"><span class="caps">Still needed</span>${shown.map((d, i) =>
+        `${i ? (i === shown.length - 1 && !more ? ' and ' : ', ') : ''}<button type="button" data-dish="${d.id}">${esc(pretty(d.name).toLowerCase())}</button>`).join('')}${more ? `, and ${spell(more)} more` : ''}</p>`
+    : `<p class="needed done"><span class="caps">Still needed</span>Nothing. The table is set.</p>`;
+  const cards = rsvps.map((r, i) => `<li class="pc" style="--i:${i}"><b>${esc(r.family)}</b><span>party of ${r.adults + r.kids}</span></li>`).join('')
+    + `<li class="pc empty" style="--i:${rsvps.length}"><a href="#rsvpBlock"><b>${rsvps.length ? 'Your name?' : 'Be the first'}</b><span>RSVP below</span></a></li>`;
+  $('meter').classList.toggle('animate', !!animate && !reduced);
+  $('meter').innerHTML = `${head}${need}<ul class="cards">${cards}</ul>`;
 }
+$('meter').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-dish]');
+  if (b) dishDialog(dishes.find((d) => d.id === b.dataset.dish));
+});
 
 /* ---------- the menu ---------- */
 function renderMenu() {

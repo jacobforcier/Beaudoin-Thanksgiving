@@ -51,27 +51,25 @@ h1 { margin: -4px 0 4px; font: italic 500 clamp(3.4rem, 15vw, 5.6rem)/1 var(--di
 .link:hover { text-decoration-color: var(--cran); }
 .countdown { margin: 14px 0 0; font-size: .7rem; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3); }
 
-/* ---------- the table ---------- */
-.table-meter { margin: 26px auto 0; max-width: 680px; }
-.table-meter svg { width: 100%; height: auto; display: block; overflow: visible; }
-.table-meter .chair { fill: var(--paper); stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 2.5 2.5; transition: fill .4s; }
-.table-meter .chair.filled { fill: #6b4f3a; stroke: #4a3526; stroke-dasharray: none; }
-.table-meter .plate { fill: #fffdf8; stroke: var(--ink); stroke-width: .9; }
-.table-meter .plate-in { fill: none; stroke: var(--ochre); stroke-width: .8; }
-.table-meter .cutlery { stroke: var(--ink); stroke-width: 1.2; stroke-linecap: round; }
-.table-meter .setting, .table-meter .dish { opacity: 0; transition: opacity .35s; }
-.table-meter .setting.on, .table-meter .dish.on { opacity: 1; }
-.table-meter .pop { transform-box: fill-box; transform-origin: center; transform: scale(.4); transition: transform .45s cubic-bezier(.3,1.5,.5,1); transition-delay: inherit; }
-.table-meter .dish .pop { transform: translateY(-8px) scale(.7); }
-.table-meter .on .pop { transform: none; }
-.table-meter .flame { transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 1.7s ease-in-out infinite alternate; }
-.table-meter .flame.b { animation-delay: -.8s; }
-.table-meter .glow { animation: glow 2.6s ease-in-out infinite alternate; }
-@keyframes flicker { 0% { transform: scale(1,1) rotate(-3deg); } 50% { transform: scale(.88,1.12) rotate(2deg); } 100% { transform: scale(1.04,.95) rotate(-1deg); } }
-@keyframes glow { from { opacity: .55; } to { opacity: 1; } }
-.tally { margin: 10px 0 0; font-style: italic; color: var(--ink-2); font-size: 1.02rem; }
-.tally b { font-style: normal; font-weight: 600; color: var(--ink); }
-.tally .sep { margin: 0 .45em; }
+/* ---------- the status ---------- */
+.status { margin: 34px auto 0; max-width: 640px; }
+.headline { margin: 0; font: italic 500 clamp(2.3rem, 9vw, 3.3rem)/1.05 var(--display); color: var(--ink); }
+.subline { margin: 6px 0 0; font-size: .74rem; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-2); }
+.needed { margin: 22px auto 0; max-width: 34em; padding: 12px 4px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); font-style: italic; font-size: 1.08rem; line-height: 1.55; color: var(--ink-2); }
+.needed .caps { font-style: normal; color: var(--cran); margin-right: .7em; }
+.needed button { border: 0; background: none; padding: 0; cursor: pointer; font: inherit; color: var(--ink); text-decoration: underline; text-decoration-color: rgba(142,42,46,.35); text-underline-offset: 3px; }
+.needed button:hover { color: var(--cran); text-decoration-color: var(--cran); }
+.needed.done { color: var(--ink); }
+.cards { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.pc { position: relative; flex: 0 0 158px; padding: 12px 16px 10px; background: var(--card); border: 1px solid var(--rule); box-shadow: 0 8px 16px -14px rgba(60,35,15,.6); text-align: center; }
+.pc b { display: block; font: italic 500 1.25rem/1.15 var(--display); color: var(--ink); overflow-wrap: anywhere; }
+.pc span { display: block; margin-top: 3px; font-size: .6rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+.pc.empty { background: transparent; border-style: dashed; border-color: var(--ink-3); box-shadow: none; }
+.pc.empty a { text-decoration: none; color: inherit; display: block; }
+.pc.empty b { color: var(--cran); }
+.status.animate .pc { animation: card-in .5s ease-out both; animation-delay: calc(var(--i) * 70ms + 150ms); }
+@keyframes card-in { from { opacity: 0; transform: translateY(6px); } }
+@media (max-width: 520px) { .pc { flex-basis: calc(50% - 5px); } }
 
 /* ---------- nav ---------- */
 .jump { position: sticky; top: 0; z-index: 20; display: flex; justify-content: center; gap: clamp(14px, 5vw, 34px); margin-top: 28px; padding: 12px 16px;
@@ -213,8 +211,6 @@ dialog h3 { margin: 0 0 4px; font: 500 2rem/1.1 var(--display); text-align: cent
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .table-meter .flame, .table-meter .glow { animation: none; }
-  .table-meter .pop { transition: none; }
 }
 @media (min-width: 720px) {
   .when { font-size: 1.3rem; }
