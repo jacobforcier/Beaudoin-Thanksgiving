@@ -91,7 +91,9 @@ function renderAll(animate = false) {
   checkFullHouse();
 }
 const signsFor = (d) => signups.filter((s) => s.dish_id === d.id);
-const courseNeeds = () => dishes.filter((x) => !x.locked && x.target && NEED_CATS.includes(x.category));
+// "Your specialty" is an invitation row, not a dish: tapping it adds the person's own dessert to the menu.
+const isSpecialty = (d) => d.category === 'desserts' && /specialty/i.test(d.name);
+const courseNeeds = () => dishes.filter((x) => !x.locked && x.target && NEED_CATS.includes(x.category) && !isSpecialty(x));
 
 /* ---------- the status: who's at the table, what's still needed ---------- */
 const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
@@ -126,10 +128,10 @@ function renderMenu() {
   let html = `<section class="course"><div class="course-head"><h3>From Danny &amp; Barb’s Kitchen</h3></div><ul class="dishes">${host.map((d) =>
     `<li><div class="dish-row host"><b class="nm">${esc(pretty(d.name))}</b><span class="lead"></span><span class="st"><span class="who"><span class="p">${HOST_COOK(d)}</span></span></span>${d.hint ? `<small class="hint">${esc(d.hint)}</small>` : ''}</div></li>`).join('')}</ul></section>`;
   html += COURSES.map(([id, name, kick]) => {
-    const list = dishes.filter((d) => d.category === id);
+    const list = dishes.filter((d) => d.category === id).sort((a, b) => isSpecialty(a) - isSpecialty(b));
     return `<section class="course"><div class="course-head"><h3>${name}</h3></div><p class="course-sub">${esc(kick)}</p>
       <ul class="dishes">${list.map(dishRow).join('')}</ul>
-      <button type="button" class="add-other" data-add="${id}">Add something else</button></section>`;
+      ${list.some(isSpecialty) ? '' : `<button type="button" class="add-other" data-add="${id}">Add something else</button>`}</section>`;
   }).join('');
   $('cats').innerHTML = html;
 }
@@ -141,6 +143,8 @@ function groupWho(list) {
   return [...m.values()];
 }
 function dishRow(d) {
+  if (isSpecialty(d)) return `<li><button type="button" class="dish-row special" data-special="${d.category}">
+    <b class="nm">${esc(pretty(d.name))}</b><span class="lead"></span><span class="st"><span class="who add">Add yours</span></span>${d.hint ? `<small class="hint">${esc(d.hint)}</small>` : ''}</button></li>`;
   const s = signsFor(d), n = s.length, full = d.target && n >= d.target;
   const who = n
     ? `<span class="who">${groupWho(s).map(([w, k]) => `<span class="p">${esc(w)}${k > 1 ? `<span class="x2">×${k}</span>` : ''}</span>`).join(', ')}</span>`
@@ -154,6 +158,7 @@ function dishRow(d) {
 $('cats').addEventListener('click', (e) => {
   const b = e.target.closest('button');
   if (!b) return;
+  if (b.dataset.special) return specialtyDialog(b.dataset.special);
   if (b.dataset.add) return addDishDialog(b.dataset.add);
   if (b.dataset.dish) return dishDialog(dishes.find((d) => d.id === b.dataset.dish));
 });
@@ -246,6 +251,29 @@ async function addDishDialog(cat) {
   if (error || !data.length) return toast('That didn’t save. Please try again.');
   if (mine) await T_SIGN.insert({ dish_id: data[0].id, who, note });
   toast(mine ? `Thank you, ${who}. ${name} is on the menu.` : `${name} was added to the menu.`);
+  load();
+}
+
+async function specialtyDialog(cat) {
+  const okLabel = 'Add it to the menu';
+  const p = openDialog('What’s your specialty?',
+    `<p class="dlg-note">Cake, cookies, bars, anything sweet. It goes on the menu under your name.</p>
+     <div class="dlg-fields">${field('Dessert', 'dItem', '', 'e.g. Ricotta cherry cake', true, 60)}${field('Your name', 'dName', myName(), '', true)}
+       <div class="stepper qty"><span class="caps">How many</span><button type="button" data-q="-1" aria-label="Fewer">−</button><output id="dQty">1</output><button type="button" data-q="1" aria-label="More">+</button></div>
+       ${field('Note', 'dNote', '', 'optional', false, 80)}</div>`,
+    [{ label: 'Close', value: null, cls: 'ghost' }, { label: okLabel, value: 'ok', submit: true }]);
+  $('dlgBody').querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => {
+    $('dQty').textContent = Math.max(1, Math.min(4, +$('dQty').textContent + +b.dataset.q));
+  }));
+  if (await p !== 'ok') return;
+  const name = $('dItem').value.trim(), who = $('dName').value.trim(), note = $('dNote').value.trim() || null, qty = +$('dQty').textContent || 1;
+  if (!name || !who) return;
+  store.set('tgName', who);
+  // no target: an extra dessert is a bonus, so it never shows up as "still needed"
+  const { data, error } = await T_DISH.insert({ category: cat, name, target: null, added_by: who, sort: 100 });
+  if (error || !data.length) return toast('That didn’t save. Please try again.');
+  await T_SIGN.insert(Array.from({ length: qty }, () => ({ dish_id: data[0].id, who, note })));
+  toast(`Thank you, ${who}. ${name}${qty > 1 ? ` ×${qty}` : ''} is on the menu.`);
   load();
 }
 
