@@ -95,7 +95,6 @@ h2 { margin: 0; font: 500 2.5rem/1.05 var(--display); color: var(--ink); }
 @keyframes ink { 0% { background: rgba(176,129,47,.28); } 100% { background: transparent; } }
 .dish-row.fresh .who, .pc.fresh b { animation: inkText 1.2s ease-out; }
 @keyframes inkText { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
-.status-live { margin: 18px 0 0; }
 @media (prefers-reduced-motion: reduce) { .fresh, .dish-row.fresh .who, .pc.fresh b { animation: none; } }
 
 /* ---------- the menu ---------- */

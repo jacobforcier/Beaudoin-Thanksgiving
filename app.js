@@ -123,7 +123,7 @@ function renderMeter(animate) {
   const cards = rsvps.map((r, i) => `<li class="pc" data-r="${r.id}" style="--i:${i}"><b>${esc(r.family)}</b><span>party of ${r.adults + r.kids}</span></li>`).join('')
     + `<li class="pc empty" style="--i:${rsvps.length}"><a href="#rsvpBlock"><b>${rsvps.length ? 'Your name?' : 'Be the first'}</b><span>RSVP below</span></a></li>`;
   $('meter').classList.toggle('animate', !!animate && !reduced);
-  $('meter').innerHTML = `${head}${need}<ul class="cards">${cards}</ul><p class="live status-live" id="statusLive" ${feed && feed.connected() ? '' : 'hidden'}><span class="dot"></span>Updating live</p>`;
+  $('meter').innerHTML = `${head}${need}<ul class="cards">${cards}</ul>`;
 }
 $('meter').addEventListener('click', (e) => {
   const b = e.target.closest('[data-dish]');
@@ -489,7 +489,7 @@ const feed = live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks'], ({ table
     toast(`${record.who} just signed up for ${d ? pretty(d.name).toLowerCase() : 'a dish'}.`);
   } else if (table === 'tg_rsvps') toast(`${record.family} just RSVP’d.`);
   else if (table === 'tg_thanks') toast('Someone just added what they’re thankful for.');
-}, (up) => { const el = $('statusLive'); if (el) el.hidden = !up; });
+});
 
 /* ---------- go ---------- */
 renderDate();
