@@ -1,0 +1,21 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Beaudoin Thanksgiving//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:beaudoin-thanksgiving-2026@jacobforcier.github.io
+DTSTAMP:20261121T000000Z
+DTSTART;VALUE=DATE:20261126
+DTEND;VALUE=DATE:20261127
+SUMMARY:🦃 Beaudoin Family Thanksgiving
+LOCATION:11 Chestnut Street\, Wilmington\, MA 01887
+DESCRIPTION:Thanksgiving at Uncle Danny's. Times coming soon. Sign-ups: https://jacobforcier.github.io/Beaudoin-Thanksgiving/
+URL:https://jacobforcier.github.io/Beaudoin-Thanksgiving/
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Thanksgiving at Uncle Danny's tomorrow! Check what you signed up to bring.
+TRIGGER:-PT15H
+END:VALARM
+END:VEVENT
+END:VCALENDAR
