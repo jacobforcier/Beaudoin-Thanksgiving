@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Homemade+Apple&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=26">
+<link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body class="add-page">
 <header class="hero">
@@ -28,16 +28,17 @@
   <section class="block">
     <header class="sec-head">
       <svg class="orn" viewBox="0 0 120 24" aria-hidden="true"><path d="M4 12 H116" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="60" cy="12" r="2.2" fill="currentColor"/></svg>
-      <h2>A Photo</h2>
+      <h2>Photos</h2>
       <p class="sub">The table, the kids, the turkey coming out of the oven.</p>
     </header>
     <form id="photoForm" class="sheet" autocomplete="off">
       <label class="pick" id="pick">
-        <input type="file" id="pFile" accept="image/*" required>
-        <img id="pPreview" alt="" hidden>
-        <span id="pPrompt"><b>Choose a photo</b><span class="caps">or take one</span></span>
+        <input type="file" id="pFile" accept="image/*" multiple required>
+        <span class="thumbs" id="pThumbs"></span>
+        <span class="prompt"><b>Choose photos</b><span class="caps">one or several</span></span>
       </label>
-      <label class="line"><span class="caps">Caption</span><input id="pCaption" maxlength="100" placeholder="optional"></label>
+      <p class="pick-note" id="pCount"></p>
+      <label class="line"><span class="caps">Caption</span><input id="pCaption" maxlength="100" placeholder="optional, goes with every photo"></label>
       <label class="line"><span class="caps">From</span><input id="pWho" maxlength="40" placeholder="your name (optional)"></label>
       <button class="btn" type="submit" id="pSend">Put it on the TV</button>
     </form>
@@ -66,7 +67,7 @@
   <div class="tc-inner">
     <p class="eyebrow">The Beaudoin Family</p>
     <h2 id="doneTitle">Merci!</h2>
-    <img id="doneImg" alt="" hidden>
+    <div class="tc-photos" id="donePhotos"></div>
     <blockquote id="doneQuote" hidden></blockquote>
     <p class="tc-msg" id="doneMsg"></p>
     <p class="bon">Happy Thanksgiving!</p>
@@ -75,7 +76,7 @@
   </div>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="config.js?v=23"></script>
-<script src="add.js?v=26"></script>
+<script src="config.js?v=27"></script>
+<script src="add.js?v=27"></script>
 </body>
 </html>

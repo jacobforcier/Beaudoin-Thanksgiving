@@ -244,8 +244,15 @@ dialog h3 { margin: 0 0 4px; font: 500 2rem/1.1 var(--display); text-align: cent
 /* ---------- "add yours" page ---------- */
 .pick { position: relative; display: flex; align-items: center; justify-content: center; min-height: 170px; border: 1.5px dashed var(--ink-3); background: var(--paper); cursor: pointer; overflow: hidden; text-align: center; }
 .pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.pick img[hidden], .pick span[hidden] { display: none; }
-.pick img { display: block; width: 100%; max-height: 320px; object-fit: contain; background: var(--paper-2); }
+.pick .thumbs { display: none; }
+.pick.has { min-height: 0; align-items: stretch; }
+.pick.has .prompt { display: none; }
+.pick.has .thumbs { display: grid; width: 100%; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; }
+.pick .thumbs img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--paper-2); }
+.pick .thumbs.one { grid-template-columns: 1fr; }
+.pick .thumbs.one img { aspect-ratio: auto; max-height: 340px; object-fit: contain; }
+.pick-note { margin: -6px 0 0; font-style: italic; font-size: .9rem; color: var(--ink-3); text-align: center; }
+.pick-note:empty { display: none; }
 .pick b { display: block; font: italic 500 1.6rem var(--display); color: var(--cran); }
 .pick .caps { color: var(--ink-3); }
 .btn:disabled { opacity: .6; cursor: default; }
@@ -273,8 +280,13 @@ dialog h3 { margin: 0 0 4px; font: 500 2rem/1.1 var(--display); text-align: cent
 .thanks-card.show .tc-inner { transform: none; }
 .tc-inner .eyebrow { font-size: 1rem; }
 .tc-inner h2 { margin: 10px 0 14px; font: italic 500 2.4rem/1.1 var(--display); color: var(--cran); }
-.tc-inner img { display: block; width: 100%; max-height: 42vh; object-fit: contain; background: #fffdf8; padding: 6px; border: 1px solid var(--rule); box-shadow: 0 10px 20px -14px rgba(60,35,15,.6); transform: rotate(-1.2deg); }
-.tc-inner img[hidden], .tc-inner blockquote[hidden] { display: none; }
+.tc-photos { display: grid; gap: 10px; }
+.tc-photos.n0 { display: none; }
+.tc-photos.n2, .tc-photos.n3, .tc-photos.n4 { grid-template-columns: 1fr 1fr; }
+.tc-photos img { display: block; width: 100%; max-height: 40vh; object-fit: contain; background: #fffdf8; padding: 5px; border: 1px solid var(--rule); box-shadow: 0 10px 20px -14px rgba(60,35,15,.6); transform: rotate(-1.2deg); }
+.tc-photos:not(.n1) img { aspect-ratio: 1; object-fit: cover; max-height: none; }
+.tc-photos img:nth-child(2n) { transform: rotate(1.4deg); }
+.tc-inner blockquote[hidden] { display: none; }
 .tc-inner blockquote { margin: 0; font: italic 500 1.5rem/1.25 var(--display); }
 .tc-inner blockquote::before { content: '“'; color: var(--cran); }
 .tc-inner blockquote::after { content: '”'; color: var(--cran); }

@@ -21,33 +21,47 @@ async function shrink(file) {
   c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
   return new Promise((res, rej) => c.toBlob((b) => b ? res(b) : rej(new Error('encode')), 'image/jpeg', 0.84));
 }
+const MAX = 10;
+let picked = [];
+function showPicked() {
+  const pick = $('pick');
+  $('pThumbs').querySelectorAll('img').forEach((im) => URL.revokeObjectURL(im.src));
+  $('pThumbs').innerHTML = picked.map((f) => `<img src="${URL.createObjectURL(f)}" alt="">`).join('');
+  $('pThumbs').classList.toggle('one', picked.length === 1);
+  pick.classList.toggle('has', picked.length > 0);
+  $('pCount').textContent = picked.length > 1 ? `${picked.length} photos chosen · tap the box to change` : picked.length ? 'Tap the photo to change it' : '';
+  $('pSend').textContent = picked.length > 1 ? `Put all ${picked.length} on the TV` : 'Put it on the TV';
+}
 $('pFile').addEventListener('change', () => {
-  const f = $('pFile').files[0];
-  if (!f) return;
-  $('pPreview').src = URL.createObjectURL(f); $('pPreview').hidden = false; $('pPrompt').hidden = true;
+  picked = [...$('pFile').files].filter((f) => f.type.startsWith('image/') || !f.type).slice(0, MAX);
+  if ($('pFile').files.length > MAX) toast(`Up to ${MAX} at a time. The first ${MAX} are ready to send.`);
+  showPicked();
 });
 $('photoForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const f = $('pFile').files[0];
-  if (!f) return toast('Choose a photo first.');
-  const btn = $('pSend'); btn.disabled = true; btn.textContent = 'Sending…';
-  try {
-    const blob = await shrink(f);
-    const path = `thursday/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-    const up = await fetch(`${SB_URL}/storage/v1/object/tg-photos/${path}`, { method: 'POST', headers: { ...H, 'Content-Type': 'image/jpeg' }, body: blob });
-    if (!up.ok) throw new Error('upload ' + up.status);
-    const who = $('pWho').value.trim() || null;
-    const row = await fetch(`${SB_URL}/rest/v1/tg_photos`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, who, caption: $('pCaption').value.trim() || null }) });
-    if (!row.ok) throw new Error('row ' + row.status);
-    if (who) store.set('tgName', who);
-    celebrate({ who, img: URL.createObjectURL(blob), msg: 'Your photo is on the TV.' });
-    e.target.reset(); $('pWho').value = who || '';
-    $('pPreview').hidden = true; $('pPrompt').hidden = false;
-  } catch {
-    toast('That photo didn’t send. Please try again.');
+  if (!picked.length) return toast('Choose a photo first.');
+  const btn = $('pSend'); btn.disabled = true;
+  const who = $('pWho').value.trim() || null, caption = $('pCaption').value.trim() || null;
+  const sent = [];
+  for (let i = 0; i < picked.length; i++) {
+    btn.textContent = picked.length > 1 ? `Sending ${i + 1} of ${picked.length}…` : 'Sending…';
+    try {
+      const blob = await shrink(picked[i]);
+      const path = `thursday/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const up = await fetch(`${SB_URL}/storage/v1/object/tg-photos/${path}`, { method: 'POST', headers: { ...H, 'Content-Type': 'image/jpeg' }, body: blob });
+      if (!up.ok) throw new Error('upload ' + up.status);
+      const row = await fetch(`${SB_URL}/rest/v1/tg_photos`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ path, who, caption }) });
+      if (!row.ok) throw new Error('row ' + row.status);
+      sent.push(URL.createObjectURL(blob));
+    } catch { /* keep going; report below */ }
   }
-  btn.disabled = false; btn.textContent = 'Put it on the TV';
+  const failed = picked.length - sent.length;
+  btn.disabled = false;
+  if (!sent.length) { showPicked(); return toast('Those didn’t send. Please try again.'); }
+  if (who) store.set('tgName', who);
+  // clear the form completely before showing the thank-you
+  picked = []; $('pFile').value = ''; $('pCaption').value = ''; showPicked();
+  celebrate({ who, imgs: sent, msg: (sent.length > 1 ? `Your ${sent.length} photos are on the TV.` : 'Your photo is on the TV.') + (failed ? ` ${failed} didn’t make it, so try ${failed > 1 ? 'those' : 'that one'} again.` : '') });
 });
 
 /* ---------- thankful note ---------- */
@@ -66,9 +80,10 @@ $('noteForm').addEventListener('submit', async (e) => {
 });
 
 /* ---------- the "Merci!" card after something is sent ---------- */
-function celebrate({ who, img, quote, msg }) {
+function celebrate({ who, imgs = [], quote, msg }) {
   $('doneTitle').textContent = who ? `Merci, ${who}!` : 'Merci!';
-  $('doneImg').hidden = !img; if (img) $('doneImg').src = img;
+  $('donePhotos').className = 'tc-photos n' + Math.min(imgs.length, 4);
+  $('donePhotos').innerHTML = imgs.slice(0, 4).map((src) => `<img src="${src}" alt="">`).join('');
   $('doneQuote').hidden = !quote; $('doneQuote').textContent = quote || '';
   $('doneMsg').textContent = msg;
   $('done').hidden = false;
