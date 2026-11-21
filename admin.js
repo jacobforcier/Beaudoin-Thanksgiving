@@ -32,13 +32,39 @@ async function load() {
   $('photos').innerHTML = photos.map((p) => `<li>
     <a href="${esc(`${SB_URL}/storage/v1/object/public/tg-photos/${p.path}`)}" target="_blank" rel="noopener"><img src="${esc(`${SB_URL}/storage/v1/object/public/tg-photos/${p.path}`)}" alt="" loading="lazy"></a>
     <p>${p.caption ? `<i>${esc(p.caption)}</i>` : ''}<span class="caps">${esc(p.who || 'No name')} · ${when(p.created_at)}</span></p>
-    <button type="button" class="btn warn" data-kind="photo" data-id="${p.id}">Delete</button></li>`).join('');
+    <span class="acts"><button type="button" class="btn ghost" data-kind="photo" data-id="${p.id}">Delete</button><button type="button" class="btn warn" data-block="photo" data-id="${p.id}">Delete &amp; block</button></span></li>`).join('');
   $('notes').innerHTML = notes.map((n) => `<li>
     <p><i>“${esc(n.body)}”</i><span class="caps">${esc(n.who || 'Anonymous')} · ${when(n.created_at)}</span></p>
-    <button type="button" class="btn warn" data-kind="note" data-id="${n.id}">Delete</button></li>`).join('');
+    <span class="acts"><button type="button" class="btn ghost" data-kind="note" data-id="${n.id}">Delete</button><button type="button" class="btn warn" data-block="note" data-id="${n.id}">Delete &amp; block</button></span></li>`).join('');
+  // posting switch and blocked phones
+  const open = await rpc('tg_posting_open', {});
+  $('posting').innerHTML = open === null ? '' : `<p>Photo and note posting is <b>${open ? 'open' : 'paused'}</b>.</p>
+    <button type="button" class="btn ${open ? 'warn' : ''}" id="toggle" data-open="${open ? 0 : 1}">${open ? 'Pause posting for everyone' : 'Reopen posting'}</button>`;
+  const blocked = (await rpc('tg_blocked_list', { p_key: key })) || [];
+  $('blocked').innerHTML = blocked.length ? `<h3 class="caps">Blocked phones</h3><ul>${blocked.map((b, i) => `<li><span>Phone ${i + 1} · blocked ${when(b.created_at)}</span>
+    <button type="button" class="link" data-unblock="${esc(b.owner_hash)}">Unblock</button></li>`).join('')}</ul>` : '';
 }
 
 document.addEventListener('click', async (e) => {
+  const t = e.target.closest('#toggle, [data-unblock], [data-block]');
+  if (t && t.id === 'toggle') {
+    const open = t.dataset.open === '1';
+    if (!confirm(open ? 'Reopen photo and note posting for everyone?' : 'Pause photo and note posting for everyone? Nothing already posted is removed.')) return;
+    toast((await rpc('tg_set_posting', { p_open: open, p_key: key })) ? (open ? 'Posting is open.' : 'Posting is paused.') : 'That didn’t work.');
+    return load();
+  }
+  if (t && t.dataset.unblock) {
+    if (!confirm('Unblock this phone? It will be able to post again.')) return;
+    toast((await rpc('tg_unblock', { p_hash: t.dataset.unblock, p_key: key })) ? 'Unblocked.' : 'That didn’t work.');
+    return load();
+  }
+  if (t && t.dataset.block) {
+    if (!confirm('Delete this, delete everything else this phone posted, and block it from posting again?')) return;
+    t.disabled = true; t.textContent = 'Blocking…';
+    const n = await rpc('tg_block', { p_table: t.dataset.block, p_id: t.dataset.id, p_key: key });
+    toast(n === null || n < 0 ? 'That didn’t work.' : `Blocked. ${n} ${n === 1 ? 'post' : 'posts'} removed.`);
+    return load();
+  }
   const b = e.target.closest('button[data-id]');
   if (!b) return;
   if (!confirm(b.dataset.kind === 'photo' ? 'Delete this photo? It comes off the TV right away.' : 'Delete this note? It comes off the TV right away.')) return;

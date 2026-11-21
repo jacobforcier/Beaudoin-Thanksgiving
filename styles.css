@@ -308,7 +308,19 @@ dialog h3 { margin: 0 0 4px; font: 500 2rem/1.1 var(--display); text-align: cent
 .admin-photos li, .admin-notes li { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: var(--card); border: 1px solid var(--rule); }
 .admin-photos img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--paper-2); }
 .admin-photos p, .admin-notes p { margin: 0; display: flex; flex-direction: column; gap: 2px; font-size: .95rem; }
-.admin-photos .btn, .admin-notes .btn { justify-self: stretch; width: 100%; padding: 8px; }
+.acts { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.admin-notes .acts { grid-template-columns: 1fr 1fr; }
+.acts .btn { width: 100%; padding: 8px 6px; letter-spacing: .12em; }
+.acts .btn.ghost { border-color: var(--rule); }
+.posting { text-align: center; display: grid; gap: 12px; justify-items: center; }
+.posting p { margin: 0; font-size: 1.1rem; }
+.blocked { margin-top: 26px; }
+.blocked h3 { text-align: center; color: var(--ink-2); margin-bottom: 8px; }
+.blocked ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.blocked li { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 2px; border-bottom: 1px solid var(--rule); font-style: italic; color: var(--ink-2); }
+.closed { text-align: center; }
+.closed-msg { margin: 0; font: italic 500 2rem var(--display); color: var(--cran); }
+.closed[hidden], #photoForm[hidden], #noteForm[hidden] { display: none; }
 .admin-notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .admin-notes i { font: italic 500 1.2rem/1.3 var(--display); }
 .admin-foot { margin: 40px 0 60px; text-align: center; font-style: italic; color: var(--ink-3); }

@@ -10,6 +10,19 @@ function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add
 const name = store.get('tgName') || '';
 $('pWho').value = name; $('tWho').value = name;
 
+/* ---------- is posting open for this phone? (paused by the hosts, or this phone was blocked) ---------- */
+async function canPost() {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/tg_can_post`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ p_hash: await fingerprint(deviceKey()) }) }).catch(() => null);
+  if (!r || !r.ok) return true; // if the check itself is unavailable, let the database decide
+  return (await r.json().catch(() => true)) !== false;
+}
+function showClosed() {
+  document.querySelectorAll('#photoForm, #noteForm').forEach((f) => { f.hidden = true; });
+  $('closed').hidden = false;
+}
+canPost().then((ok) => { if (!ok) showClosed(); });
+
 /* ---------- photo ---------- */
 // Shrink to at most 1600px and re-encode as JPEG on the phone: uploads stay small and the photo's
 // location data (EXIF) never leaves the phone.
@@ -42,7 +55,7 @@ $('photoForm').addEventListener('submit', async (e) => {
   if (!picked.length) return toast('Choose a photo first.');
   const btn = $('pSend'); btn.disabled = true;
   const who = $('pWho').value.trim() || null, caption = $('pCaption').value.trim() || null;
-  const sent = [];
+  const sent = []; let closedNow = false;
   for (let i = 0; i < picked.length; i++) {
     btn.textContent = picked.length > 1 ? `Sending ${i + 1} of ${picked.length}…` : 'Sending…';
     try {
@@ -52,14 +65,16 @@ $('photoForm').addEventListener('submit', async (e) => {
       if (!up.ok) throw new Error('upload ' + up.status);
       const row = await fetch(`${SB_URL}/rest/v1/tg_photos`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' },
         body: JSON.stringify({ path, who, caption, owner_hash: await fingerprint(deviceKey()) }) });
+      if (row.status === 401 || row.status === 403) { closedNow = true; break; }
       if (!row.ok) throw new Error('row ' + row.status);
       const [saved] = await row.json();
       remember('photo', saved);
       sent.push(URL.createObjectURL(blob));
     } catch { /* keep going; report below */ }
   }
-  const failed = picked.length - sent.length;
   btn.disabled = false;
+  if (closedNow && !sent.length) { showClosed(); return; }
+  const failed = picked.length - sent.length;
   if (!sent.length) { showPicked(); return toast('Those didn’t send. Please try again.'); }
   if (who) store.set('tgName', who);
   // clear the form completely before showing the thank-you
@@ -77,6 +92,7 @@ $('noteForm').addEventListener('submit', async (e) => {
   const who = $('tWho').value.trim() || null;
   const r = await fetch(`${SB_URL}/rest/v1/tg_thanks`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' },
     body: JSON.stringify({ body, who, owner_hash: await fingerprint(deviceKey()) }) }).catch(() => null);
+  if (r && (r.status === 401 || r.status === 403)) return showClosed();
   if (!r || !r.ok) return toast('That didn’t save. Please try again.');
   const [saved] = await r.json().catch(() => [null]);
   if (saved) remember('note', saved);

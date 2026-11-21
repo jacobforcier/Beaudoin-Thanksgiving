@@ -397,6 +397,7 @@ $('thanksForm').addEventListener('submit', async (e) => {
   const body = $('tBody').value.trim();
   if (!body) return;
   const { data, error } = await T_THANKS.insert({ body, who: $('tWho').value.trim() || null, owner_hash: await fingerprint(deviceKey()) });
+  if (error && (error.code === '42501' || /row-level security/i.test(error.message || ''))) return toast('Posting is closed right now.');
   if (error || !data.length) return toast('That didn’t save. Please try again.');
   store.set('tgMine', JSON.stringify([...myThanks(), data[0].id]));
   $('tBody').value = ''; grow();
