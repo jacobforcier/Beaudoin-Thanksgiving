@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Homemade+Apple&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=23">
+<link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body class="add-page">
 <header class="hero">
@@ -62,8 +62,20 @@
   <p class="tv-link"><a href="./">Back to the sign-up page</a></p>
 </footer>
 
+<div class="thanks-card" id="done" hidden role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+  <div class="tc-inner">
+    <p class="eyebrow">The Beaudoin Family</p>
+    <h2 id="doneTitle">Merci!</h2>
+    <img id="doneImg" alt="" hidden>
+    <blockquote id="doneQuote" hidden></blockquote>
+    <p class="tc-msg" id="doneMsg"></p>
+    <p class="bon">Happy Thanksgiving!</p>
+    <button type="button" class="btn" id="doneAgain">Add another</button>
+    <a class="tc-back" href="./">Back to the sign-up page</a>
+  </div>
+</div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="config.js?v=23"></script>
-<script src="add.js?v=23"></script>
+<script src="add.js?v=26"></script>
 </body>
 </html>

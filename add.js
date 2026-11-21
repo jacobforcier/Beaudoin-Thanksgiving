@@ -41,9 +41,9 @@ $('photoForm').addEventListener('submit', async (e) => {
       body: JSON.stringify({ path, who, caption: $('pCaption').value.trim() || null }) });
     if (!row.ok) throw new Error('row ' + row.status);
     if (who) store.set('tgName', who);
+    celebrate({ who, img: URL.createObjectURL(blob), msg: 'Your photo is on the TV.' });
     e.target.reset(); $('pWho').value = who || '';
     $('pPreview').hidden = true; $('pPrompt').hidden = false;
-    toast('It’s on the TV. Merci!');
   } catch {
     toast('That photo didn’t send. Please try again.');
   }
@@ -62,5 +62,21 @@ $('noteForm').addEventListener('submit', async (e) => {
   if (!r || !r.ok) return toast('That didn’t save. Please try again.');
   if (who) store.set('tgName', who);
   $('tBody').value = ''; grow();
-  toast('It’s on the TV. Merci!');
+  celebrate({ who, quote: body, msg: 'Your words are on the TV.' });
+});
+
+/* ---------- the "Merci!" card after something is sent ---------- */
+function celebrate({ who, img, quote, msg }) {
+  $('doneTitle').textContent = who ? `Merci, ${who}!` : 'Merci!';
+  $('doneImg').hidden = !img; if (img) $('doneImg').src = img;
+  $('doneQuote').hidden = !quote; $('doneQuote').textContent = quote || '';
+  $('doneMsg').textContent = msg;
+  $('done').hidden = false;
+  requestAnimationFrame(() => $('done').classList.add('show'));
+  $('doneAgain').focus();
+}
+$('doneAgain').addEventListener('click', () => {
+  $('done').classList.remove('show');
+  setTimeout(() => { $('done').hidden = true; }, 300);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
