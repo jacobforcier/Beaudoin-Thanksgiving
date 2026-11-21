@@ -7,7 +7,6 @@ const COURSES = [
 const NEED_CATS = ['sides', 'desserts']; // courses that count toward "covered"
 const NO_PAN = /gravy|cranberr|roll|bread/i; // sides that don't go in a chafing dish
 const HOST_COOK = (d) => /tourti/i.test(d.name) ? 'Sammy' : 'Danny &amp; Barb'; // who makes each host dish
-const HIDDEN = ['homemade noodles']; // removed from the menu; rows still in the database
 
 /* ---------- tiny Supabase REST client ---------- */
 function table(name) {
@@ -68,7 +67,7 @@ async function load() {
     return;
   }
   const first = !loadedOnce; loadedOnce = true; lastLoad = Date.now();
-  dishes = a.data.filter((d) => (d.category === 'host' || COURSES.some((c) => c[0] === d.category)) && !HIDDEN.includes(d.name.trim().toLowerCase()));
+  dishes = a.data.filter((d) => (d.category === 'host' || COURSES.some((c) => c[0] === d.category)));
   signups = b.data.filter((s) => dishes.some((d) => d.id === s.dish_id));
   if (c.data) rsvps = c.data;
   if (t.data) thanks = t.data;

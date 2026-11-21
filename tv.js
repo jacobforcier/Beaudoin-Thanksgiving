@@ -8,7 +8,6 @@ const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'ei
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 const spell = (n) => n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '') : String(n);
 const COURSES = ['host', 'sides', 'desserts', 'extras'];
-const HIDDEN = ['homemade noodles'];
 const HOST_COOK = (d) => /tourti/i.test(d.name) ? 'Sammy' : 'Danny & Barb';
 const SECONDS = { title: 14, guests: 14, menu: 16, quote: 11, weather: 10, photo: 9 };
 const PHOTO_URL = (path) => `${SB_URL}/storage/v1/object/public/tg-photos/${path}`;
@@ -25,7 +24,7 @@ async function load() {
       get('tg_photos', 'select=*&order=created_at.desc').catch(() => []),
     ]);
     photos.slice(0, 40).forEach((p) => { const im = new Image(); im.src = PHOTO_URL(p.path); }); // preload so slides never pop in
-    const shown = dishes.filter((d) => COURSES.includes(d.category) && !HIDDEN.includes(d.name.trim().toLowerCase()) && !/specialty/i.test(d.name));
+    const shown = dishes.filter((d) => COURSES.includes(d.category) && !/specialty/i.test(d.name));
     data = { dishes: shown, signups: signups.filter((s) => shown.some((d) => d.id === s.dish_id)), rsvps, thanks, photos };
     build();
   } catch { setTimeout(load, 10000); }

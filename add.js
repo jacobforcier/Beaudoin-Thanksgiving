@@ -18,7 +18,7 @@ async function canPost() {
   return (await r.json().catch(() => true)) !== false;
 }
 function showClosed() {
-  document.querySelectorAll('#photoForm, #noteForm').forEach((f) => { f.hidden = true; });
+  document.body.classList.add('is-closed');
   $('closed').hidden = false;
 }
 canPost().then((ok) => { if (!ok) showClosed(); });
