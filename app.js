@@ -460,12 +460,10 @@ function gobbleSound() {
   }
 }
 
-/* ---------- the one secret: tap the turkey ---------- */
+/* ---------- the one secret: tap the title ---------- */
 const GOBBLES = ['Gobble gobble.', 'Glouglou! (That’s turkey in French.)', 'Save room for pie.', 'Did someone say tourtière?'];
 let gob = 0;
-$('turkey').addEventListener('click', () => {
-  const t = $('turkey');
-  t.classList.remove('gobble'); void t.offsetWidth; t.classList.add('gobble');
+$('title').addEventListener('click', () => {
   gobbleSound();
   toast(GOBBLES[gob++ % GOBBLES.length]);
 });

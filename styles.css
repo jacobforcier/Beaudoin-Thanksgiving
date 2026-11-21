@@ -39,13 +39,8 @@ button, input, textarea { font: inherit; color: inherit; }
   box-shadow: 0 1px 0 #fff inset, 0 18px 40px -28px rgba(60,35,15,.45);
 }
 .invite::before { content: ''; position: absolute; inset: 11px; border: 1px solid var(--rule); pointer-events: none; opacity: .55; }
-.turkey { display: block; margin: 0 auto 6px; padding: 0; border: 0; background: none; cursor: pointer; width: 58px; }
-.turkey svg { display: block; width: 100%; height: auto; }
-.turkey .tail { transform-origin: 32px 40px; transition: transform .3s; }
-.turkey.gobble .tail { animation: fan .7s ease-in-out; }
-.turkey.gobble svg { animation: bob .7s ease-in-out; }
-@keyframes fan { 0%,100% { transform: scale(1); } 30% { transform: scale(1.12) rotate(-4deg); } 60% { transform: scale(1.08) rotate(4deg); } }
-@keyframes bob { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-3px); } 50% { transform: translateY(0); } 75% { transform: translateY(-2px); } }
+.invite { padding-top: 38px; }
+#title { cursor: default; -webkit-user-select: none; user-select: none; }
 .eyebrow { margin: 0; font-size: .74rem; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--ink-2); }
 h1 { margin: -4px 0 4px; font: italic 500 clamp(3.4rem, 15vw, 5.6rem)/1 var(--display); color: var(--cran); letter-spacing: -.01em; }
 .when { margin: 0; font-size: 1.12rem; }

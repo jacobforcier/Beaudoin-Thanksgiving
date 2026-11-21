@@ -8,7 +8,7 @@ Sign-up site for Thanksgiving: Thursday 11/26 at Uncle Danny's, 11 Chestnut Stre
 - "Thankful For" quotes
 - Add to Calendar (`thanksgiving.ics` or Google), directions, countdown, and Thanksgiving Day forecast (Open-Meteo)
 - The table in the header fills with place settings as people RSVP and dishes as they sign up
-- Tap the turkey
+- Tap the title
 
 Design: a printed menu card. Cormorant Garamond + EB Garamond, cream paper, brown-black ink, one cranberry accent, no emoji.
 
