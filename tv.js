@@ -22,8 +22,8 @@ async function load() {
     const [dishes, signups, rsvps, thanks, photos] = await Promise.all([
       get('tg_dishes', 'select=*&order=sort,created_at'), get('tg_signups', 'select=*&order=created_at'),
       get('tg_rsvps', 'select=*&order=created_at'), get('tg_thanks', 'select=*&order=created_at.desc'),
-      get('tg_photos', 'select=*&order=created_at.desc').then((l) => l.filter((p) => !(p.who === 'Test' && /^TEST photo/.test(p.caption || '')))).catch(() => []),
-    ]);  // (hides the one test photo from setup until it's deleted)
+      get('tg_photos', 'select=*&order=created_at.desc').catch(() => []),
+    ]);
     photos.slice(0, 40).forEach((p) => { const im = new Image(); im.src = PHOTO_URL(p.path); }); // preload so slides never pop in
     const shown = dishes.filter((d) => COURSES.includes(d.category) && !HIDDEN.includes(d.name.trim().toLowerCase()) && !/specialty/i.test(d.name));
     data = { dishes: shown, signups: signups.filter((s) => shown.some((d) => d.id === s.dish_id)), rsvps, thanks, photos };
