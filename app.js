@@ -350,7 +350,7 @@ $('thanksForm').addEventListener('submit', async (e) => {
   const { data, error } = await T_THANKS.insert({ body, who: $('tWho').value.trim() || null });
   if (error || !data.length) return toast('That didn’t save. Please try again.');
   store.set('tgMine', JSON.stringify([...myThanks(), data[0].id]));
-  $('tBody').value = '';
+  $('tBody').value = ''; grow();
   toast('Added. Merci.');
   load();
 });
@@ -361,6 +361,8 @@ $('thanksWall').addEventListener('click', async (e) => {
   load();
 });
 if (myName()) $('tWho').value = myName();
+const grow = () => { const t = $('tBody'); t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; };
+$('tBody').addEventListener('input', grow);
 
 /* ---------- date, calendar, directions ---------- */
 function renderDate() {
@@ -395,6 +397,16 @@ const WMO = {
   61: 'rainy', 63: 'rainy', 65: 'very rainy', 66: 'icy, with freezing rain', 67: 'icy, with freezing rain',
   71: 'snowy', 73: 'snowy', 75: 'very snowy', 77: 'snowy', 80: 'showery', 81: 'showery', 82: 'stormy', 85: 'snowy', 86: 'very snowy', 95: 'stormy', 96: 'stormy', 99: 'stormy',
 };
+let weatherAt = 0;
+function renderLive() {
+  if (!weatherAt) return;
+  const m = Math.floor((Date.now() - weatherAt) / 60e3);
+  const t = new Date(weatherAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  $('liveText').innerHTML = `Live forecast <b>· updated ${m < 1 ? 'just now' : `${t}`}</b>`;
+  $('live').hidden = false;
+}
+setInterval(renderLive, 30e3);
+setInterval(() => { if (!document.hidden) weather(); }, 30 * 60e3);
 async function weather() {
   const el = $('weather');
   try {
@@ -412,7 +424,8 @@ async function weather() {
       : pop >= 40 ? 'There’s a chance of rain, so bring an umbrella just in case.'
       : 'A nice day for it. Backyard football, anyone?';
     el.innerHTML = `Thursday looks ${sky}, with a high of ${hi}° and a low of ${lo}°.
-      <em>${note}</em><small>Wilmington, MA · ${pop}% chance of precipitation${daysUntil() > 5 ? ' · may still change' : ''}</small>`;
+      <em>${note}</em><small>Wilmington, MA · ${pop}% chance of precipitation · wind up to ${wind} mph${daysUntil() > 5 ? ' · may still change' : ''}</small>`;
+    weatherAt = Date.now(); renderLive();
   } catch {
     el.innerHTML = '<span class="loading">The forecast isn’t available right now. Check back later.</span>';
   }
