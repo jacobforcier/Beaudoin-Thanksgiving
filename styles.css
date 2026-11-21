@@ -1,4 +1,4 @@
-/* A printed menu card on Uncle Danny's table: cream paper, brown-black ink, one cranberry accent. */
+/* A printed menu card on Danny & Barb's table: cream paper, brown-black ink, one cranberry accent. */
 :root {
   --paper: #f4ede0;
   --paper-2: #ebe1cf;
@@ -45,6 +45,8 @@ button, input, textarea { font: inherit; color: inherit; }
 .eyebrow::after { content: ''; display: block; width: 56px; height: 1px; margin: 12px auto 6px; background: var(--ochre); }
 h1 { margin: -4px 0 4px; font: italic 500 clamp(3.4rem, 15vw, 5.6rem)/1 var(--display); color: var(--cran); letter-spacing: -.01em; }
 .when { margin: 0; font-size: 1.12rem; }
+.when .nw { white-space: nowrap; }
+@media (max-width: 430px) { .when .sep { display: none; } .when .nw { display: block; } }
 .where { margin: 0; color: var(--ink-2); font-style: italic; }
 .links { margin: 14px 0 0; }
 .link { border: 0; background: none; padding: 0; cursor: pointer; color: var(--cran); font-size: .95rem; text-decoration: underline; text-decoration-color: rgba(142,42,46,.35); text-underline-offset: 3px; }

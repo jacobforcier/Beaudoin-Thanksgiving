@@ -121,8 +121,8 @@ $('meter').addEventListener('click', (e) => {
 function renderMenu() {
   if (!dishes.length) return;
   const host = dishes.filter((d) => d.category === 'host');
-  let html = `<section class="course"><div class="course-head"><h3>From Uncle Danny’s Kitchen</h3></div><ul class="dishes">${host.map((d) =>
-    `<li><div class="dish-row host"><span class="nm"><b>${esc(pretty(d.name))}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</span><span class="lead"></span><span class="st"><span class="who">Uncle Danny</span></span></div></li>`).join('')}</ul></section>`;
+  let html = `<section class="course"><div class="course-head"><h3>From Danny &amp; Barb’s Kitchen</h3></div><ul class="dishes">${host.map((d) =>
+    `<li><div class="dish-row host"><span class="nm"><b>${esc(pretty(d.name))}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</span><span class="lead"></span><span class="st"><span class="who">Danny &amp; Barb</span></span></div></li>`).join('')}</ul></section>`;
   html += COURSES.map(([id, name, kick]) => {
     const list = dishes.filter((d) => d.category === id);
     return `<section class="course"><div class="course-head"><h3>${name}</h3></div><p class="course-sub">${esc(kick)}</p>
@@ -337,12 +337,12 @@ const GCAL = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
   + '&text=' + encodeURIComponent('Beaudoin Family Thanksgiving')
   + '&dates=20261126/20261127'
   + '&location=' + encodeURIComponent(ADDRESS)
-  + '&details=' + encodeURIComponent('Thanksgiving at Uncle Danny’s. Times coming soon.\nSign-ups: ' + location.origin + location.pathname);
+  + '&details=' + encodeURIComponent('Thanksgiving at Danny & Barb’s. Times coming soon.\nSign-ups: ' + location.origin + location.pathname);
 $('calBtn').addEventListener('click', () => {
   const apple = `<a class="btn ${isApple ? '' : 'ghost'}" href="thanksgiving.ics">Apple or Outlook calendar</a>`;
   const google = `<a class="btn ${isApple ? 'ghost' : ''}" href="${GCAL}" target="_blank" rel="noopener">Google Calendar</a>`;
   openDialog('Add to your calendar',
-    `<p class="dlg-note">Thursday, November 26 at Uncle Danny’s. It’s an all-day event until the times are set.</p>
+    `<p class="dlg-note">Thursday, November 26 at Danny & Barb’s. It’s an all-day event until the times are set.</p>
      <div class="cal-opts">${isApple ? apple + google : google + apple}</div>`,
     [{ label: 'Close', value: null, cls: 'ghost' }]);
   $('dlgBody').querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setTimeout(() => dlg.close(), 300)));

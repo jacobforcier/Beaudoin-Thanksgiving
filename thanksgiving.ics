@@ -10,11 +10,11 @@ DTSTART;VALUE=DATE:20261126
 DTEND;VALUE=DATE:20261127
 SUMMARY:🦃 Beaudoin Family Thanksgiving
 LOCATION:11 Chestnut Street\, Wilmington\, MA 01887
-DESCRIPTION:Thanksgiving at Uncle Danny's. Times coming soon. Sign-ups: https://jacobforcier.github.io/Beaudoin-Thanksgiving/
+DESCRIPTION:Thanksgiving at Danny & Barb's. Times coming soon. Sign-ups: https://jacobforcier.github.io/Beaudoin-Thanksgiving/
 URL:https://jacobforcier.github.io/Beaudoin-Thanksgiving/
 BEGIN:VALARM
 ACTION:DISPLAY
-DESCRIPTION:Thanksgiving at Uncle Danny's tomorrow! Check what you signed up to bring.
+DESCRIPTION:Thanksgiving at Danny & Barb's tomorrow! Check what you signed up to bring.
 TRIGGER:-PT15H
 END:VALARM
 END:VEVENT
