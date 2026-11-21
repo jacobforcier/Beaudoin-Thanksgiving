@@ -8,7 +8,6 @@ const CATS = [
   ['sides', 'Sides', 'The good stuff next to the turkey'],
   ['desserts', 'Pies & Desserts', 'Room for about six'],
   ['extras', 'Something Else', 'Not needed, but bring it if you want to get creative'],
-  ['paper', 'Paper Goods & Containers', 'The unsung heroes'],
 ];
 const PAN_CATS = ['sides', 'desserts'];
 
