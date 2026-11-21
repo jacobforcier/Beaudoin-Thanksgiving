@@ -2,7 +2,7 @@
 
 Sign-up site for Thanksgiving: Thursday 11/26 at Danny & Barb's, 11 Chestnut Street, Wilmington, MA.
 
-- Danny & Barb cover the turkey and Mémère's tourtière
+- Danny & Barb cover the turkey; their son Sammy makes Mémère's tourtière
 - Suggested dishes (just suggestions); anyone can sign up for a dish, double up, or add their own
 - RSVP with adult/kid counts (running total, no target)
 - "Thankful For" quotes

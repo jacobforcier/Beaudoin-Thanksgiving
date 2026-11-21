@@ -10,6 +10,7 @@ const COURSES = [
   ['extras', 'Something Else', 'Not needed, but bring it if you’d like to get creative'],
 ];
 const PAN_CATS = ['sides', 'desserts'];
+const HOST_COOK = (d) => /tourti/i.test(d.name) ? 'Sammy' : 'Danny &amp; Barb'; // who makes each host dish
 const HIDDEN = ['homemade noodles']; // removed from the menu; rows still in the database
 
 /* ---------- tiny Supabase REST client ---------- */
@@ -122,7 +123,7 @@ function renderMenu() {
   if (!dishes.length) return;
   const host = dishes.filter((d) => d.category === 'host');
   let html = `<section class="course"><div class="course-head"><h3>From Danny &amp; Barb’s Kitchen</h3></div><ul class="dishes">${host.map((d) =>
-    `<li><div class="dish-row host"><span class="nm"><b>${esc(pretty(d.name))}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</span><span class="lead"></span><span class="st"><span class="who">Danny &amp; Barb</span></span></div></li>`).join('')}</ul></section>`;
+    `<li><div class="dish-row host"><span class="nm"><b>${esc(pretty(d.name))}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}</span><span class="lead"></span><span class="st"><span class="who">${HOST_COOK(d)}</span></span></div></li>`).join('')}</ul></section>`;
   html += COURSES.map(([id, name, kick]) => {
     const list = dishes.filter((d) => d.category === id);
     return `<section class="course"><div class="course-head"><h3>${name}</h3></div><p class="course-sub">${esc(kick)}</p>
