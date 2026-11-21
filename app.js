@@ -10,6 +10,7 @@ const COURSES = [
   ['extras', 'Something Else', 'Not needed, but bring it if you’d like to get creative'],
 ];
 const PAN_CATS = ['sides', 'desserts'];
+const HIDDEN = ['homemade noodles']; // removed from the menu; rows still in the database
 
 /* ---------- tiny Supabase REST client ---------- */
 function table(name) {
@@ -69,7 +70,7 @@ async function load() {
     return;
   }
   const first = !loadedOnce; loadedOnce = true;
-  dishes = a.data.filter((d) => d.category === 'host' || COURSES.some((c) => c[0] === d.category));
+  dishes = a.data.filter((d) => (d.category === 'host' || COURSES.some((c) => c[0] === d.category)) && !HIDDEN.includes(d.name.trim().toLowerCase()));
   signups = b.data.filter((s) => dishes.some((d) => d.id === s.dish_id));
   if (c.data) rsvps = c.data;
   if (t.data) thanks = t.data;
