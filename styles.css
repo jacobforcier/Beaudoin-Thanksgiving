@@ -188,6 +188,8 @@ h2 { margin: 0; font: 500 2.5rem/1.05 var(--display); color: var(--ink); }
 footer { text-align: center; padding: 64px 16px 72px; }
 .bon { margin: 6px 0 14px; font: 1.5rem/1.6 'Homemade Apple', cursive; color: var(--cran); }
 footer .small { color: var(--ink-3); margin: 0; }
+.tv-link { margin: 18px 0 0; font-style: italic; color: var(--ink-3); font-size: .95rem; }
+.tv-link a { color: var(--cran); text-decoration-color: rgba(142,42,46,.35); text-underline-offset: 3px; }
 
 /* ---------- dialog ---------- */
 dialog { width: min(440px, calc(100% - 28px)); max-height: calc(100dvh - 40px); padding: 0; border: 1px solid var(--rule); border-radius: 2px; background: var(--card); color: var(--ink);

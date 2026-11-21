@@ -12,6 +12,9 @@ Sign-up site for Thanksgiving: Thursday 11/26 at Danny & Barb's, 11 Chestnut Str
 
 Design: a printed menu card. Cormorant Garamond + EB Garamond, cream paper, brown-black ink, one cranberry accent, no emoji.
 
-Data lives in Supabase (`tg_dishes`, `tg_signups`, `tg_rsvps`, `tg_thanks`) and refreshes every few seconds.
+- Live updates over Supabase Realtime (`live.js`, no library): sign-ups appear instantly with a "just signed up" note
+- TV mode (`tv.html`): a slow, live slideshow for the big screen on Thursday — the invitation, who's here, the menu, each thankful note, the forecast. Tap to start (full screen, keeps the screen awake); arrow keys move between slides
+
+Shared settings live in `config.js`. Data lives in Supabase (`tg_dishes`, `tg_signups`, `tg_rsvps`, `tg_thanks`) and refreshes every few seconds.
 
 Plain static HTML/CSS/JS, no build step. Hosted on GitHub Pages from the repo root.
