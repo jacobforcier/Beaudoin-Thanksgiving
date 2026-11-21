@@ -3,7 +3,7 @@
 Sign-up site for Thanksgiving: Thursday 11/26 at Uncle Danny's, 11 Chestnut Street, Wilmington, MA.
 
 - Uncle Danny covers the turkey and Mémère's tourtière
-- Suggested dishes from last year (with "Last year: ___" hints); anyone can sign up for a dish, double up, or add their own
+- Suggested dishes (just suggestions); anyone can sign up for a dish, double up, or add their own
 - RSVP with adult/kid counts (running total, no target)
 - Gratitude wall ("What we're thankful for")
 - Add to Calendar (`thanksgiving.ics` or Google), directions, countdown, and Thanksgiving Day forecast (Open-Meteo)

@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=1">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 <div class="leaves" id="leaves" aria-hidden="true"></div>
@@ -36,7 +36,7 @@
 
   <div class="facts">
     <div class="fact">
-      <span class="ico">📅</span>
+      <span class="date-badge" aria-hidden="true"><i>Nov</i>26</span>
       <div><b>Thursday 11/26</b><span>Times coming soon</span></div>
       <button id="calBtn" class="btn ghost sm" type="button">Add to calendar</button>
     </div>
@@ -53,14 +53,14 @@
   <a href="#menuBlock">🍽 Food</a>
   <a href="#rsvpBlock">🙋 RSVP</a>
   <a href="#thanksBlock">🍂 Thankful</a>
-  <a href="#walkBlock">🏈 Weather</a>
+  <a href="#weatherBlock">🌤️ Weather</a>
 </nav>
 
 <main>
   <section class="block" id="menuBlock">
     <div class="block-head">
       <h2>The Menu</h2>
-      <p class="sub">These are suggestions from last year. Tap one to bring it, or add your own. Doubles are welcome.</p>
+      <p class="sub">These are just suggestions. Tap one to bring it, or add your own. Doubles are welcome.</p>
     </div>
     <p class="pan-note">🍳 Hot sides and desserts: please bring them in an <b>aluminum pan (about 10″×12″)</b> so they fit the chafing dishes.</p>
     <div id="cats"><p class="loading">Setting the table…</p></div>
@@ -99,10 +99,10 @@
     </form>
   </section>
 
-  <section class="block" id="walkBlock">
+  <section class="block" id="weatherBlock">
     <div class="block-head">
-      <h2>Walk &amp; Backyard Football</h2>
-      <p class="sub">After dinner, if the weather cooperates.</p>
+      <h2>Thanksgiving Weather</h2>
+      <p class="sub">The forecast for Wilmington on Thursday.</p>
     </div>
     <div id="weather" class="card weather"><p class="loading">Checking the sky…</p></div>
   </section>
@@ -124,6 +124,6 @@
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <div id="fullhouse" class="fullhouse" role="status"><span class="fh-ico">🦃</span><div><b>The table is set!</b><span>Every dish is covered. Merci, everyone. Bon appétit!</span></div></div>
 
-<script src="app.js?v=1"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

@@ -96,47 +96,84 @@ const signsFor = (d) => signups.filter((s) => s.dish_id === d.id);
 const people = () => rsvps.reduce((s, r) => s + r.adults + r.kids, 0);
 
 /* ---------- the table (hero meter) ---------- */
+// An illustrated dinner table, top-down: chairs get a place setting as people RSVP,
+// signed-up dishes are set down along the runner, the turkey sits in the middle.
 function renderMeter(animate) {
-  const n = people();
-  const perSide = Math.min(18, Math.max(8, Math.ceil(n / 2)));
-  const W = 600, x0 = 50, x1 = 550, step = (x1 - x0) / (perSide - 1);
-  let seats = '', plates = '';
-  for (let i = 0; i < perSide * 2; i++) {
-    const top = i % 2 === 0, k = Math.floor(i / 2);
-    const x = x0 + k * step, y = top ? 22 : 148;
-    seats += `<circle class="seat" cx="${x}" cy="${y}" r="11"/>`;
-    const delay = animate ? `transition-delay:${(i * 0.05).toFixed(2)}s` : '';
-    plates += `<g class="plate ${animate ? '' : (i < n ? 'on' : '')}" data-on="${i < n ? 1 : 0}" style="${delay}">
-      <circle cx="${x}" cy="${y}" r="11" fill="#fff" stroke="#d4692a" stroke-width="2"/><circle cx="${x}" cy="${y}" r="6" fill="none" stroke="#e8c9a3" stroke-width="1.5"/></g>`;
-  }
-  // dishes: host items first, then one emoji per sign-up
-  const host = dishes.filter((d) => d.locked);
-  const list = [...host, ...signups.map((s) => dishes.find((d) => d.id === s.dish_id)).filter(Boolean)].slice(0, 40);
-  const rows = list.length > 20 ? [list.slice(0, Math.ceil(list.length / 2)), list.slice(Math.ceil(list.length / 2))] : [list];
-  let food = '';
-  rows.forEach((row, r) => {
-    const y = rows.length === 1 ? 91 : 77 + r * 28;
-    const gap = Math.min(26, 470 / Math.max(row.length, 1));
-    const start = W / 2 - ((row.length - 1) * gap) / 2;
-    row.forEach((d, i) => {
-      const idx = r * rows[0].length + i;
-      const delay = animate ? `transition-delay:${(0.4 + idx * 0.06).toFixed(2)}s` : '';
-      food += `<text class="dish ${animate ? '' : 'on'}" x="${start + i * gap}" y="${y}" text-anchor="middle" dominant-baseline="middle" style="${delay}">${dishEmoji(d)}</text>`;
-    });
+  const A = rsvps.reduce((s, r) => s + r.adults, 0), K = rsvps.reduce((s, r) => s + r.kids, 0), n = A + K;
+  const W = 600, H = 216;
+  const perSide = Math.min(16, Math.max(6, Math.ceil(Math.max(0, n - 2) / 2)));
+  const tx0 = 50, tx1 = 550, ty0 = 58, ty1 = 176;           // table top
+  const sx0 = 86, sx1 = 514, step = (sx1 - sx0) / (perSide - 1);
+  // seat order: both heads first, then alternate top/bottom from the middle out
+  const seats = [{ x: 24, y: (ty0 + ty1) / 2, end: 'l' }, { x: 576, y: (ty0 + ty1) / 2, end: 'r' }];
+  const mid = (perSide - 1) / 2;
+  const cols = [...Array(perSide).keys()].sort((a, b) => Math.abs(a - mid) - Math.abs(b - mid) || a - b);
+  cols.forEach((c) => { seats.push({ x: sx0 + c * step, y: 39, side: 't' }); seats.push({ x: sx0 + c * step, y: 195, side: 'b' }); });
+  const d = (i, base, per) => animate ? `style="transition-delay:${(base + i * per).toFixed(2)}s"` : '';
+  let chairs = '', settings = '';
+  seats.forEach((s, i) => {
+    const on = i < n, cls = `${on ? 'filled' : ''} ${animate ? '' : (on ? 'on' : '')}`, data = `data-on="${on ? 1 : 0}"`;
+    chairs += s.end
+      ? `<rect class="chair ${on ? 'filled' : ''}" x="${s.x - 11}" y="${s.y - 17}" width="22" height="34" rx="7"/>`
+      : `<rect class="chair ${on ? 'filled' : ''}" x="${s.x - 14}" y="${s.y - 11}" width="28" height="22" rx="7"/>`;
+    // place setting sits on the table edge, facing the chair
+    const px = s.end === 'l' ? 70 : s.end === 'r' ? 530 : s.x;
+    const py = s.end ? s.y : s.side === 't' ? 75 : 159;
+    const rot = s.end === 'l' ? -90 : s.end === 'r' ? 90 : s.side === 'b' ? 180 : 0;
+    settings += `<g class="setting ${cls}" ${data} ${d(i, 0, 0.045)} transform="translate(${px} ${py}) rotate(${rot})">
+      <g class="pop"><rect x="-17" y="-1" width="2.2" height="12" rx="1" class="fork"/><rect x="15" y="-1" width="2.2" height="12" rx="1" class="knife"/>
+      <circle r="10" class="plate"/><circle r="6.5" class="plate-in"/></g></g>`;
   });
-  const dishCount = signups.length;
-  $('meter').innerHTML = `<svg viewBox="0 0 ${W} 170" role="img" aria-label="${n} people coming, ${dishCount} dishes signed up">
-    ${seats}
-    <rect x="22" y="45" width="556" height="80" rx="40" fill="#a8703f"/>
-    <rect x="22" y="45" width="556" height="80" rx="40" fill="url(#grain)" opacity=".35"/>
-    <rect x="30" y="52" width="540" height="66" rx="33" fill="#fbf2e2" stroke="#e3cfae" stroke-width="2"/>
-    <defs><pattern id="grain" width="40" height="8" patternUnits="userSpaceOnUse"><path d="M0 4 Q10 2 20 4 T40 4" stroke="#7d4f28" fill="none" stroke-width="1"/></pattern></defs>
-    ${plates}${food}
+  // dishes along the runner, either side of the centerpiece
+  const host = dishes.filter((x) => x.locked);
+  const brought = signups.map((s) => dishes.find((x) => x.id === s.dish_id)).filter(Boolean);
+  const onRunner = [...host.filter((x) => !/turkey/i.test(x.name)), ...brought];
+  const slots = [];
+  for (let k = 0; k < 7; k++) for (const side of [-1, 1]) for (const row of [0, 1]) slots.push({ x: 300 + side * (70 + k * 25), y: row ? 128 : 106 });
+  const shown = onRunner.slice(0, slots.length), extra = onRunner.length - shown.length;
+  const food = shown.map((x, i) => `<g class="dish ${animate ? '' : 'on'}" ${d(i, 0.5, 0.05)} transform="translate(${slots[i].x} ${slots[i].y})">
+      <g class="pop"><circle r="10.5" class="bowl"/><text y="1" text-anchor="middle" dominant-baseline="central">${dishEmoji(x)}</text></g></g>`).join('')
+    + (extra > 0 ? `<g transform="translate(${300 + 70 + 7 * 25} 117)"><rect x="-14" y="-9" width="28" height="18" rx="9" class="more"/><text text-anchor="middle" dominant-baseline="central" class="more-t">+${extra}</text></g>` : '');
+  // covered = sides/desserts dishes that hit their target
+  const need = dishes.filter((x) => !x.locked && x.target && PAN_CATS.includes(x.category));
+  const covered = need.filter((x) => signsFor(x).length >= x.target).length;
+  const pct = need.length ? Math.round((covered / need.length) * 100) : 0;
+
+  $('meter').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${n} people coming, ${signups.length} dishes signed up">
+    <defs>
+      <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b47a45"/><stop offset="1" stop-color="#94592c"/></linearGradient>
+      <pattern id="grain" width="120" height="14" patternUnits="userSpaceOnUse"><path d="M0 4 C30 1 50 7 80 4 S110 2 120 4 M0 11 C25 9 60 13 90 10 S115 12 120 11" stroke="#6e3f1c" stroke-opacity=".22" fill="none" stroke-width="1"/></pattern>
+      <pattern id="plaid" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#f3e3c6"/><rect width="16" height="4" y="6" fill="#d4692a" opacity=".22"/><rect width="4" height="16" x="6" fill="#9b2c34" opacity=".14"/></pattern>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#5a3415" flood-opacity=".28"/></filter>
+      <radialGradient id="glow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".75"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+    </defs>
+    ${chairs}
+    <rect x="${tx0}" y="${ty0}" width="${tx1 - tx0}" height="${ty1 - ty0}" rx="20" fill="url(#wood)" filter="url(#soft)"/>
+    <rect x="${tx0}" y="${ty0}" width="${tx1 - tx0}" height="${ty1 - ty0}" rx="20" fill="url(#grain)"/>
+    <rect x="${tx0 + 3}" y="${ty0 + 3}" width="${tx1 - tx0 - 6}" height="${ty1 - ty0 - 6}" rx="17" fill="none" stroke="#d6a271" stroke-opacity=".5"/>
+    <rect x="${tx0 + 18}" y="93" width="${tx1 - tx0 - 36}" height="48" rx="3" fill="url(#plaid)"/>
+    <path d="M${tx0 + 18} 96 H${tx1 - 18} M${tx0 + 18} 138 H${tx1 - 18}" stroke="#fffaf1" stroke-width="1.5" stroke-dasharray="3 3" opacity=".8"/>
+    ${settings}
+    <g class="center">
+      <circle cx="248" cy="117" r="16" fill="url(#glow)" class="glow"/><circle cx="352" cy="117" r="16" fill="url(#glow)" class="glow"/>
+      <rect x="244" y="112" width="8" height="14" rx="2" fill="#fbf4e4" stroke="#e3cfae"/><path class="flame" d="M248 103 q4 5 0 9 q-4 -4 0 -9z" fill="#f4a23a"/>
+      <rect x="348" y="112" width="8" height="14" rx="2" fill="#fbf4e4" stroke="#e3cfae"/><path class="flame" d="M352 103 q4 5 0 9 q-4 -4 0 -9z" fill="#f4a23a"/>
+      <ellipse cx="300" cy="119" rx="34" ry="21" fill="#fffaf1" stroke="#e3cfae" stroke-width="1.5" filter="url(#soft)"/>
+      <ellipse cx="300" cy="119" rx="26" ry="15" fill="none" stroke="#c9973a" stroke-opacity=".5"/>
+      <text x="300" y="119" text-anchor="middle" dominant-baseline="central" font-size="26">🦃</text>
+    </g>
+    ${food}
   </svg>
-  <p class="meter-label"><b>${n}</b> ${n === 1 ? 'person' : 'people'} coming · <b>${dishCount}</b> ${dishCount === 1 ? 'dish' : 'dishes'} on the table</p>`;
+  <div class="stats">
+    <div class="stat"><span class="s-ico">🙋</span><div><b>${n}</b><span>${n === 1 ? 'person' : 'people'} coming</span><small>${rsvps.length ? `${plural(A, 'adult')} · ${plural(K, 'kid')}` : 'RSVP below'}</small></div></div>
+    <div class="stat"><span class="s-ico">🍽️</span><div><b>${signups.length}</b><span>${signups.length === 1 ? 'dish' : 'dishes'} coming</span><small>plus Danny’s turkey &amp; tourtière</small></div></div>
+    <div class="stat wide"><span class="s-ico">${covered === need.length && need.length ? '✅' : '🥧'}</span><div><b>${covered}<em> of ${need.length}</em></b><span>sides &amp; desserts covered</span>
+      <i class="bar"><i style="width:${animate ? 0 : pct}%" data-w="${pct}"></i></i></div></div>
+  </div>`;
   if (animate) requestAnimationFrame(() => setTimeout(() => {
-    $('meter').querySelectorAll('.plate[data-on="1"], .dish').forEach((el) => el.classList.add('on'));
-  }, reduced ? 0 : 150));
+    $('meter').querySelectorAll('.setting[data-on="1"], .dish').forEach((el) => el.classList.add('on'));
+    const b = $('meter').querySelector('.bar i'); b.style.width = b.dataset.w + '%';
+  }, reduced ? 0 : 200));
 }
 
 /* ---------- menu ---------- */
@@ -164,8 +201,7 @@ function dishCard(d) {
   return `<article class="card dish-card ${full ? 'full' : ''}">
     ${canDelete ? `<button type="button" class="x" data-del="${d.id}" aria-label="Remove ${esc(d.name)}">✕</button>` : ''}
     <div class="dish-top"><span class="e">${dishEmoji(d)}</span>
-      <div class="nm"><b>${esc(d.name)}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}${d.added_by && !d.last_year ? `<small>Added by ${esc(d.added_by)}</small>` : ''}</div>${canDelete ? '' : chip}</div>
-    ${d.last_year ? `<p class="last">Last year: ${esc(d.last_year)}</p>` : ''}
+      <div class="nm"><b>${esc(d.name)}</b>${d.hint ? `<small>${esc(d.hint)}</small>` : ''}${d.added_by ? `<small>Added by ${esc(d.added_by)}</small>` : ''}</div>${canDelete ? '' : chip}</div>
     ${n ? `<ul class="who">${s.map((x) => `<li><button type="button" data-sign="${x.id}"><b>${esc(x.who)}</b>${x.note ? ` <i>· ${esc(x.note)}</i>` : ''}</button></li>`).join('')}</ul>` : ''}
     <button type="button" class="bring" data-bring="${d.id}">${n ? '+ I’ll bring one too' : '+ I’ll bring this'}</button>
   </article>`;
@@ -403,10 +439,10 @@ async function weather() {
     const hi = Math.round(d.temperature_2m_max[i]), lo = Math.round(d.temperature_2m_min[i]);
     const pop = d.precipitation_probability_max[i] ?? 0, wind = Math.round(d.wind_speed_10m_max[i]);
     const [ico, txt] = WMO[code] || ['🌡️', 'Weather'];
-    const verdict = pop >= 70 || code >= 95 || [56, 57, 65, 66, 67, 75, 82, 86].includes(code) ? 'Looks like a couch-and-football-on-TV kind of day 📺'
-      : hi < 32 || wind > 20 ? 'Game on, but bundle up 🧣'
-      : pop >= 40 ? 'Maybe. Keep a jacket by the door 🧥'
-      : 'Walk and backyard football are ON 🏈';
+    const verdict = pop >= 70 || code >= 95 || [56, 57, 65, 66, 67, 75, 82, 86].includes(code) ? 'A stay-inside, football-on-TV kind of day 📺'
+      : hi < 32 || wind > 20 ? 'Chilly one. Bundle up on the way in 🧣'
+      : pop >= 40 ? 'Might be wet. Bring an umbrella just in case ☂️'
+      : 'Nice day for it. Backyard football, anyone? 🏈';
     el.innerHTML = `<span class="wx-ico">${ico}</span><div>
       <p class="big">${txt}, ${hi}° / ${lo}°F</p>
       <p class="meta">${pop}% chance of precipitation · wind up to ${wind} mph</p>
