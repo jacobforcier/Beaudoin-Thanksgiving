@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Beaudoin Family Thanksgiving</title>
 <meta name="description" content="Thanksgiving at Uncle Danny's. Claim a dish, RSVP your crew, and see what everyone's bringing.">
-<meta name="theme-color" content="#f6ecdc">
+<meta name="theme-color" content="#f4ede0">
 <meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Beaudoin Thanksgiving">
-<meta property="og:title" content="🦃 Beaudoin Family Thanksgiving · Thursday 11/26">
+<meta property="og:title" content="Beaudoin Family Thanksgiving · Thursday 11/26">
 <meta property="og:description" content="At Uncle Danny's in Wilmington. Claim a dish, RSVP your crew, and see what everyone's bringing.">
 <meta property="og:url" content="https://jacobforcier.github.io/Beaudoin-Thanksgiving/">
 <meta property="og:image" content="https://jacobforcier.github.io/Beaudoin-Thanksgiving/og.png">
@@ -18,99 +18,118 @@
 <meta property="og:image:alt" content="Beaudoin Family Thanksgiving: Thursday 11/26 at Uncle Danny's, Wilmington MA">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦃</text></svg>">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=5">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Homemade+Apple&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
-<div class="leaves" id="leaves" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="wheat" viewBox="0 0 120 24">
+    <path d="M4 12 H116" stroke="currentColor" stroke-width="1" fill="none"/>
+    <g fill="currentColor">
+      <ellipse cx="22" cy="8" rx="5" ry="2" transform="rotate(-28 22 8)"/><ellipse cx="22" cy="16" rx="5" ry="2" transform="rotate(28 22 16)"/>
+      <ellipse cx="32" cy="8" rx="5" ry="2" transform="rotate(-28 32 8)"/><ellipse cx="32" cy="16" rx="5" ry="2" transform="rotate(28 32 16)"/>
+      <ellipse cx="42" cy="8.5" rx="4.5" ry="1.8" transform="rotate(-28 42 8.5)"/><ellipse cx="42" cy="15.5" rx="4.5" ry="1.8" transform="rotate(28 42 15.5)"/>
+      <ellipse cx="13" cy="12" rx="5" ry="1.9"/>
+      <ellipse cx="98" cy="8" rx="5" ry="2" transform="rotate(28 98 8)"/><ellipse cx="98" cy="16" rx="5" ry="2" transform="rotate(-28 98 16)"/>
+      <ellipse cx="88" cy="8" rx="5" ry="2" transform="rotate(28 88 8)"/><ellipse cx="88" cy="16" rx="5" ry="2" transform="rotate(-28 88 16)"/>
+      <ellipse cx="78" cy="8.5" rx="4.5" ry="1.8" transform="rotate(28 78 8.5)"/><ellipse cx="78" cy="15.5" rx="4.5" ry="1.8" transform="rotate(-28 78 15.5)"/>
+      <ellipse cx="107" cy="12" rx="5" ry="1.9"/>
+      <circle cx="60" cy="12" r="2.2"/>
+    </g>
+  </symbol>
+</svg>
 
 <header class="hero">
-  <p class="kicker" id="kicker">Thursday, November 26</p>
-  <h1><span class="fam">The Beaudoin Family</span><span class="tg">Thanksgiving <button type="button" class="turkey" id="turkey" aria-label="Turkey">🦃</button></span></h1>
-  <p class="tagline">At Uncle Danny’s. Bring your appetite and something to share.</p>
+  <div class="invite">
+    <button type="button" class="turkey" id="turkey" aria-label="Turkey">
+      <svg viewBox="0 0 64 56" aria-hidden="true">
+        <g class="tail">
+          <path d="M32 40 L8 22 A26 26 0 0 1 14 12 Z" fill="#8e2a2e"/><path d="M32 40 L14 12 A26 26 0 0 1 24 6 Z" fill="#b0812f"/>
+          <path d="M32 40 L24 6 A26 26 0 0 1 40 6 Z" fill="#8e2a2e"/><path d="M32 40 L40 6 A26 26 0 0 1 50 12 Z" fill="#b0812f"/>
+          <path d="M32 40 L50 12 A26 26 0 0 1 56 22 Z" fill="#8e2a2e"/>
+        </g>
+        <ellipse cx="32" cy="38" rx="12" ry="11" fill="#5a3b26"/>
+        <circle cx="32" cy="24" r="6" fill="#5a3b26"/>
+        <circle cx="30.5" cy="23" r="1" fill="#f4ede0"/><circle cx="33.5" cy="23" r="1" fill="#f4ede0"/>
+        <path d="M32 25 l-2.2 3 h4.4z" fill="#d9a441"/><path d="M33 28 q2 4 -1 6 q-1 -3 1 -6z" fill="#b5363a"/>
+        <path d="M27 48 v5 M37 48 v5" stroke="#b0812f" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <p class="eyebrow">The Beaudoin Family</p>
+    <h1>Thanksgiving</h1>
+    <p class="when">Thursday, November 26 <span class="sep">·</span> at Uncle Danny’s</p>
+    <p class="where">11 Chestnut Street, Wilmington</p>
+    <p class="links"><button type="button" id="calBtn" class="link">Add to calendar</button><span class="sep">·</span><a id="directions" class="link" target="_blank" rel="noopener">Directions</a></p>
+    <p class="countdown" id="countdown"></p>
+  </div>
 
   <div class="table-meter" id="meter" aria-label="Who's coming and what's on the table"></div>
-
-  <div class="facts">
-    <div class="fact">
-      <span class="date-badge" aria-hidden="true"><i>Nov</i>26</span>
-      <div><b>Thursday 11/26</b><span>Times coming soon</span></div>
-      <button id="calBtn" class="btn ghost sm" type="button">Add to calendar</button>
-    </div>
-    <div class="fact">
-      <span class="ico">🏡</span>
-      <div><b>11 Chestnut Street</b><span>Wilmington, MA</span></div>
-      <a id="directions" class="btn ghost sm" target="_blank" rel="noopener">Directions</a>
-    </div>
-  </div>
-  <p class="countdown" id="countdown"></p>
 </header>
 
 <nav class="jump" id="jump" aria-label="Jump to section">
-  <a href="#menuBlock">🍽 Food</a>
-  <a href="#rsvpBlock">🙋 RSVP</a>
-  <a href="#thanksBlock">🍂 Thankful</a>
-  <a href="#weatherBlock">🌤️ Weather</a>
+  <a href="#menuBlock">Menu</a><a href="#rsvpBlock">Guests</a><a href="#thanksBlock">Thanks</a><a href="#weatherBlock">Weather</a>
 </nav>
 
 <main>
   <section class="block" id="menuBlock">
-    <div class="block-head">
+    <header class="sec-head">
+      <svg class="orn" aria-hidden="true"><use href="#wheat"/></svg>
       <h2>The Menu</h2>
-      <p class="sub">These are just suggestions. Tap one to bring it, or add your own. Doubles are welcome.</p>
-    </div>
-    <p class="pan-note">🍳 Hot sides and desserts: please bring them in an <b>aluminum pan (about 10″×12″)</b> so they fit the chafing dishes.</p>
+      <p class="sub">Suggestions only. Tap a dish to bring it, or add your own. Doubles are always welcome.</p>
+    </header>
+    <p class="pan-note"><span class="caps">A note</span> Hot sides and desserts, please bring them in an aluminum pan (about 10″ × 12″) so they fit the chafing dishes.</p>
     <div id="cats"><p class="loading">Setting the table…</p></div>
   </section>
 
   <section class="block" id="rsvpBlock">
-    <div class="block-head">
+    <header class="sec-head">
+      <svg class="orn" aria-hidden="true"><use href="#wheat"/></svg>
       <h2>Who’s Coming</h2>
       <p class="sub">Add your crew so Uncle Danny knows how many plates to set.</p>
-    </div>
+    </header>
     <p class="total" id="rsvpTotal"></p>
-    <ul id="rsvpList" class="rsvps"></ul>
-    <form id="rsvpForm" class="card rsvp-form" autocomplete="off">
-      <input id="rFamily" maxlength="40" placeholder="Family / name (e.g. The Oestreichs)" required>
-      <div class="steppers">
-        <div class="stepper"><span>Adults</span><button type="button" data-step="rAdults:-1" aria-label="Fewer adults">−</button><output id="rAdults">2</output><button type="button" data-step="rAdults:1" aria-label="More adults">+</button></div>
-        <div class="stepper"><span>Kids</span><button type="button" data-step="rKids:-1" aria-label="Fewer kids">−</button><output id="rKids">0</output><button type="button" data-step="rKids:1" aria-label="More kids">+</button></div>
+    <ul id="rsvpList" class="ledger"></ul>
+    <form id="rsvpForm" class="sheet" autocomplete="off">
+      <label class="line"><span class="caps">Family</span><input id="rFamily" maxlength="40" placeholder="e.g. The Oestreichs" required></label>
+      <div class="counts">
+        <div class="stepper"><span class="caps">Adults</span><button type="button" data-step="rAdults:-1" aria-label="Fewer adults">−</button><output id="rAdults">2</output><button type="button" data-step="rAdults:1" aria-label="More adults">+</button></div>
+        <div class="stepper"><span class="caps">Kids</span><button type="button" data-step="rKids:-1" aria-label="Fewer kids">−</button><output id="rKids">0</output><button type="button" data-step="rKids:1" aria-label="More kids">+</button></div>
       </div>
-      <input id="rNote" maxlength="140" placeholder="Note (optional): arriving late, bringing the dog…">
-      <button class="btn" type="submit">We’ll be there!</button>
+      <label class="line"><span class="caps">Note</span><input id="rNote" maxlength="140" placeholder="optional"></label>
+      <button class="btn" type="submit">We’ll be there</button>
     </form>
   </section>
 
   <section class="block" id="thanksBlock">
-    <div class="block-head">
-      <h2>What We’re Thankful For</h2>
-      <p class="sub">Add a line. We’ll read a few at dinner.</p>
-    </div>
-    <div id="thanksWall" class="wall"></div>
-    <form id="thanksForm" class="card thanks-form" autocomplete="off">
-      <textarea id="tBody" maxlength="140" rows="2" placeholder="I’m thankful for…" required></textarea>
-      <div class="row">
-        <input id="tWho" maxlength="40" placeholder="Your name (optional)">
-        <button class="btn" type="submit">Add a leaf 🍂</button>
-      </div>
+    <header class="sec-head">
+      <svg class="orn" aria-hidden="true"><use href="#wheat"/></svg>
+      <h2>Thankful For</h2>
+      <p class="sub">Add a line. We’ll read a few aloud at dinner.</p>
+    </header>
+    <div id="thanksWall" class="quotes"></div>
+    <form id="thanksForm" class="sheet" autocomplete="off">
+      <label class="line tall"><span class="caps">This year I’m thankful for</span><textarea id="tBody" maxlength="140" rows="2" required></textarea></label>
+      <label class="line"><span class="caps">Signed</span><input id="tWho" maxlength="40" placeholder="optional"></label>
+      <button class="btn" type="submit">Add it</button>
     </form>
   </section>
 
   <section class="block" id="weatherBlock">
-    <div class="block-head">
-      <h2>Thanksgiving Weather</h2>
-      <p class="sub">The forecast for Wilmington on Thursday.</p>
-    </div>
-    <div id="weather" class="card weather"><p class="loading">Checking the sky…</p></div>
+    <header class="sec-head">
+      <svg class="orn" aria-hidden="true"><use href="#wheat"/></svg>
+      <h2>The Forecast</h2>
+    </header>
+    <p id="weather" class="weather"><span class="loading">Checking the sky…</span></p>
   </section>
 </main>
 
 <footer>
+  <svg class="orn" aria-hidden="true"><use href="#wheat"/></svg>
   <p class="bon">Bon appétit, la famille!</p>
-  <p class="small">Sign-ups save automatically and update for everyone.</p>
+  <p class="caps small">Sign-ups save automatically and update for everyone</p>
 </footer>
 
 <dialog id="dlg">
@@ -122,8 +141,8 @@
 </dialog>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<div id="fullhouse" class="fullhouse" role="status"><span class="fh-ico">🦃</span><div><b>The table is set!</b><span>Every dish is covered. Merci, everyone. Bon appétit!</span></div></div>
+<div id="fullhouse" class="fullhouse" role="status"><b>The table is set.</b><span>Every side and dessert is covered. Merci, everyone.</span></div>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
