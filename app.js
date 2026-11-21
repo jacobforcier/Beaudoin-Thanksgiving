@@ -422,6 +422,13 @@ function renderDate() {
     : n < 0 ? 'Thank you for a wonderful Thanksgiving'
     : n === 1 ? 'Tomorrow' : `${word(n)} days to go`)
     + (hereNow > 0 ? ` · ${word(hereNow)} ${hereNow === 1 ? 'other' : 'others'} here now` : '');
+  // one quiet line about the photo and thankful-note wall; on the day it speaks to people at the party
+  const share = $('shareLine');
+  share.hidden = n < -1;
+  share.classList.toggle('today', n <= 0);
+  share.innerHTML = n <= 0
+    ? 'Share a photo or what you’re thankful for. It goes right on the TV. <a href="add.html">Add yours</a>'
+    : 'New this year: on Thursday, share photos and what you’re thankful for, and they’ll play on the TV at Danny &amp; Barb’s. <a href="add.html">Add yours</a>';
 }
 const isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
 $('directions').href = isApple

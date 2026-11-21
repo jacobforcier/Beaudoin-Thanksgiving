@@ -23,6 +23,29 @@ function showClosed() {
 }
 canPost().then((ok) => { if (!ok) showClosed(); });
 
+/* ---------- photos are for the day itself: Thanksgiving 6 a.m. Eastern through the end of Friday ----------
+   Thankful notes stay open all week. A phone unlocked with the hosts' link can post photos any time. */
+const PHOTOS_OPEN = Date.UTC(2026, 10, 26, 11), PHOTOS_CLOSE = Date.UTC(2026, 10, 28, 5);
+(async function photoWindow() {
+  const now = Date.now();
+  if (now >= PHOTOS_OPEN && now < PHOTOS_CLOSE) return;
+  let host = false;
+  try { const k = localStorage.getItem('tgAdmin'); if (k) {
+    const r = await fetch(`${SB_URL}/rest/v1/rpc/tg_is_admin`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_key: k }) });
+    host = r.ok && (await r.json()) === true;
+  } } catch {}
+  const soon = $('photoSoon');
+  if (host) {
+    soon.innerHTML = '<p class="sub">Photos open for everyone on Thanksgiving morning. This phone is unlocked for the hosts, so you can post now.</p>';
+  } else {
+    $('photoForm').hidden = true;
+    soon.innerHTML = now < PHOTOS_OPEN
+      ? '<p class="soon-big">Photos open Thanksgiving morning.</p><p class="sub">In the meantime, add what you’re thankful for below.</p>'
+      : '<p class="soon-big">Photos are closed now.</p><p class="sub">Thank you for sharing the day. Happy Thanksgiving!</p>';
+  }
+  soon.hidden = false;
+})();
+
 /* ---------- photo ---------- */
 // Shrink to at most 1600px and re-encode as JPEG on the phone: uploads stay small and the photo's
 // location data (EXIF) never leaves the phone.

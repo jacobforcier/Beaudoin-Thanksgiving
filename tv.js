@@ -1,5 +1,5 @@
 /* TV mode: a slow, live slideshow for the living-room screen on Thursday.
-   Slides: the invitation, who's here, what's on the table, each thankful note, the forecast. */
+   Slides: the invitation, who's here, then photos and thankful notes taking turns. */
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const pretty = (s) => String(s ?? '').replace(/'/g, '’');
@@ -8,13 +8,12 @@ const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'ei
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 const spell = (n) => n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '') : String(n);
 const COURSES = ['host', 'sides', 'desserts', 'extras'];
-const HOST_COOK = (d) => /tourti/i.test(d.name) ? 'Sammy' : 'Danny & Barb';
-const SECONDS = { title: 14, guests: 14, menu: 16, quote: 11, weather: 10, photo: 9 };
+const SECONDS = { title: 14, guests: 14, quote: 11, photo: 9 };
 const PHOTO_URL = (path) => `${SB_URL}/storage/v1/object/public/tg-photos/${path}`;
 
 const H = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
 const get = (t, q) => fetch(`${SB_URL}/rest/v1/${t}?${q}`, { headers: H }).then((r) => r.ok ? r.json() : Promise.reject(r.status));
-let data = { dishes: [], signups: [], rsvps: [], thanks: [], photos: [] }, sky = null;
+let data = { dishes: [], signups: [], rsvps: [], thanks: [], photos: [] };
 
 async function load() {
   try {
@@ -30,27 +29,10 @@ async function load() {
   } catch { setTimeout(load, 10000); }
 }
 
-async function weather() {
-  try {
-    const w = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=weather_code,temperature_2m_max,temperature_2m_min&current=temperature_2m&temperature_unit=fahrenheit&timezone=America%2FNew_York&forecast_days=16`)).json();
-    const key = `${DAY.y}-${String(DAY.m).padStart(2, '0')}-${String(DAY.d).padStart(2, '0')}`, i = w.daily.time.indexOf(key);
-    if (i === -1) return;
-    const SKY = { 0: 'sunny', 1: 'mostly sunny', 2: 'partly cloudy', 3: 'cloudy', 45: 'foggy', 61: 'rainy', 63: 'rainy', 71: 'snowy', 73: 'snowy', 80: 'showery' };
-    sky = { text: SKY[w.daily.weather_code[i]] || 'changeable', hi: Math.round(w.daily.temperature_2m_max[i]), lo: Math.round(w.daily.temperature_2m_min[i]),
-      now: w.current ? Math.round(w.current.temperature_2m) : null };
-    build();
-  } catch {}
-}
-
 /* ---------- slides ---------- */
 function etToday() {
   const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: 'numeric', day: 'numeric' }).formatToParts(new Date()).map((x) => [x.type, x.value]));
   return Math.round((Date.UTC(DAY.y, DAY.m - 1, DAY.d) - Date.UTC(+p.year, +p.month - 1, +p.day)) / 86400e3);
-}
-function groupWho(list) {
-  const m = new Map();
-  list.forEach((x) => { const k = x.who.trim().toLowerCase(); const e = m.get(k); if (e) e[1]++; else m.set(k, [x.who.trim(), 1]); });
-  return [...m.values()].map(([w, k]) => `${esc(w)}${k > 1 ? `<em>×${k}</em>` : ''}`).join(', ');
 }
 function slides() {
   const { dishes, signups, rsvps, thanks } = data, out = [];
@@ -61,25 +43,13 @@ function slides() {
   const n = rsvps.reduce((s, r) => s + r.adults + r.kids, 0);
   if (rsvps.length) out.push({ kind: 'guests', html: `<p class="kicker">Around the table</p><h2>${cap(spell(n))} at the table</h2>
     <div class="cards">${rsvps.map((r) => `<div class="pc"><b>${esc(r.family)}</b><span class="caps">party of ${r.adults + r.kids}</span></div>`).join('')}</div>` });
-  const rows = dishes.map((d) => {
-    const s = signups.filter((x) => x.dish_id === d.id);
-    if (d.locked) return `<div class="row"><span class="nm">${esc(pretty(d.name))}</span><span class="lead"></span><span class="who">${esc(HOST_COOK(d))}</span></div>`;
-    return s.length ? `<div class="row"><span class="nm">${esc(pretty(d.name))}</span><span class="lead"></span><span class="who">${groupWho(s)}</span></div>` : '';
-  }).filter(Boolean);
-  // up to 12 dishes per slide (two columns of six) so it always fits a 720p screen
-  for (let i = 0, k = 0; i < rows.length; i += 12, k++) {
-    const chunk = rows.slice(i, i + 12);
-    out.push({ kind: 'menu', id: 'menu' + k, html: `<div class="menu-slide"><p class="kicker">What’s on the table${k ? ', continued' : ''}</p><h2>The Menu</h2>
-      <div class="menu ${chunk.length <= 5 ? 'one' : ''}">${chunk.join('')}</div></div>` });
-  }
   // photos and notes take turns so neither crowds out the other
   const notes = thanks.slice(0, 24).map((t) => ({ kind: 'quote', id: t.id, html: `<p class="kicker">Thankful for</p>
     <blockquote class="quote ${t.body.length > 70 ? 'long' : ''}">${esc(t.body)}</blockquote><p class="caps by">${t.who ? esc(t.who) : 'Anonymous'}</p>` }));
   const pics = data.photos.slice(0, 40).map((p) => ({ kind: 'photo', id: p.id, html: `<figure class="photo"><img src="${esc(PHOTO_URL(p.path))}" alt="">
     <figcaption>${p.caption ? `<span class="cap">${esc(p.caption)}</span>` : ''}${p.who ? `<span class="caps">${esc(p.who)}</span>` : ''}</figcaption></figure>` }));
+  if (!notes.length && !pics.length) out.push({ kind: 'quote', html: `<p class="kicker">Thankful for</p><h2>What are you thankful for?</h2><p class="soft">Scan the code in the corner to add a photo or a few words.</p>` });
   for (let i = 0; i < Math.max(notes.length, pics.length); i++) { if (pics[i]) out.push(pics[i]); if (notes[i]) out.push(notes[i]); }
-  if (sky) out.push({ kind: 'weather', html: `<p class="kicker">Outside today</p><h2>${cap(sky.text)}</h2>
-    <p class="big">A high of ${sky.hi}° and a low of ${sky.lo}°${sky.now != null && days === 0 ? `, ${sky.now}° right now` : ''}</p><p class="soft">Wilmington, Massachusetts</p>` });
   return out;
 }
 
@@ -133,7 +103,6 @@ live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks', 'tg_photos'], ({ table
   else if (table === 'tg_photos') { jumpTo = record.id; note(record.who ? `A new photo from ${record.who}` : 'A new photo'); }
 }, { onStatus: (up) => $('live').classList.toggle('up', up), presence: { kind: 'tv' } });
 setInterval(load, 5 * 60e3);
-setInterval(weather, 30 * 60e3);
 
 /* ---------- clock, controls, full screen, keep awake ---------- */
 const clock = () => { $('clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
@@ -166,4 +135,3 @@ document.addEventListener('mousemove', () => { document.body.classList.remove('i
 })();
 
 load();
-weather();
