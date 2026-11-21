@@ -143,6 +143,7 @@ function renderMenu() {
       ${list.some(isSpecialty) ? '' : `<button type="button" class="add-other" data-add="${id}">Add something else</button>`}</section>`;
   }).join('');
   $('cats').innerHTML = html;
+  paintLooking();
 }
 
 // Same person signing up twice shows once, with a count: "The Jacob Forciers ×2".
@@ -212,7 +213,11 @@ async function dishDialog(d) {
     $('dQty').textContent = q;
     okBtn.textContent = q > 1 ? `I’ll bring ${word(q)}` : okLabel;
   }));
+  // tell everyone else someone has this dish open, until the box closes
+  const ping = () => feed.broadcast('looking', { dish: d.id });
+  ping(); const pingT = setInterval(ping, 4000);
   const r = await p;
+  clearInterval(pingT); feed.broadcast('done', { dish: d.id });
   if (edit) return signupDialog(signups.find((x) => x.id === edit));
   if (r === 'delete') {
     await T_DISH.remove(byId(d.id));
@@ -376,11 +381,13 @@ const grow = () => { const t = $('tBody'); t.style.height = 'auto'; t.style.heig
 $('tBody').addEventListener('input', grow);
 
 /* ---------- date, calendar, directions ---------- */
+let hereNow = 0; // other people on the page right now (live presence)
 function renderDate() {
   const n = daysUntil();
-  $('countdown').textContent = n === 0 ? 'Happy Thanksgiving'
+  $('countdown').textContent = (n === 0 ? 'Happy Thanksgiving'
     : n < 0 ? 'Thank you for a wonderful Thanksgiving'
-    : n === 1 ? 'Tomorrow' : `${word(n)} days to go`;
+    : n === 1 ? 'Tomorrow' : `${word(n)} days to go`)
+    + (hereNow > 0 ? ` · ${word(hereNow)} ${hereNow === 1 ? 'other' : 'others'} here now` : '');
 }
 const isApple = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document;
 $('directions').href = isApple
@@ -489,7 +496,28 @@ const feed = live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks'], ({ table
     toast(`${record.who} just signed up for ${d ? pretty(d.name).toLowerCase() : 'a dish'}.`);
   } else if (table === 'tg_rsvps') toast(`${record.family} just RSVP’d.`);
   else if (table === 'tg_thanks') toast('Someone just added what they’re thankful for.');
+}, {
+  presence: { kind: 'page' },
+  onPresence: (list) => { hereNow = list.filter((m) => m.kind === 'page' && m.key !== feed.me).length; renderDate(); },
+  onBroadcast: (event, p) => {
+    if (!p.dish) return;
+    if (event === 'looking') looking.set(p.dish, Date.now() + 7000); else looking.delete(p.dish);
+    paintLooking();
+  },
 });
+
+/* "Someone is signing up for this…" on any dish another visitor has open right now */
+const looking = new Map();
+function paintLooking() {
+  const now = Date.now();
+  looking.forEach((until, id) => { if (until < now) looking.delete(id); });
+  document.querySelectorAll('.dish-row .looking').forEach((el) => { if (!looking.has(el.parentElement.dataset.dish)) el.remove(); });
+  looking.forEach((_, id) => {
+    const row = document.querySelector(`.dish-row[data-dish="${id}"]`);
+    if (row && !row.querySelector('.looking')) row.insertAdjacentHTML('beforeend', '<small class="looking">Someone is signing up for this…</small>');
+  });
+}
+setInterval(paintLooking, 1500);
 
 /* ---------- go ---------- */
 renderDate();

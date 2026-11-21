@@ -10,20 +10,23 @@ const spell = (n) => n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n 
 const COURSES = ['host', 'sides', 'desserts', 'extras'];
 const HIDDEN = ['homemade noodles'];
 const HOST_COOK = (d) => /tourti/i.test(d.name) ? 'Sammy' : 'Danny & Barb';
-const SECONDS = { title: 14, guests: 14, menu: 16, quote: 11, weather: 10 };
+const SECONDS = { title: 14, guests: 14, menu: 16, quote: 11, weather: 10, photo: 9 };
+const PHOTO_URL = (path) => `${SB_URL}/storage/v1/object/public/tg-photos/${path}`;
 
 const H = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
 const get = (t, q) => fetch(`${SB_URL}/rest/v1/${t}?${q}`, { headers: H }).then((r) => r.ok ? r.json() : Promise.reject(r.status));
-let data = { dishes: [], signups: [], rsvps: [], thanks: [] }, sky = null;
+let data = { dishes: [], signups: [], rsvps: [], thanks: [], photos: [] }, sky = null;
 
 async function load() {
   try {
-    const [dishes, signups, rsvps, thanks] = await Promise.all([
+    const [dishes, signups, rsvps, thanks, photos] = await Promise.all([
       get('tg_dishes', 'select=*&order=sort,created_at'), get('tg_signups', 'select=*&order=created_at'),
       get('tg_rsvps', 'select=*&order=created_at'), get('tg_thanks', 'select=*&order=created_at.desc'),
-    ]);
+      get('tg_photos', 'select=*&order=created_at.desc').then((l) => l.filter((p) => !(p.who === 'Test' && /^TEST photo/.test(p.caption || '')))).catch(() => []),
+    ]);  // (hides the one test photo from setup until it's deleted)
+    photos.slice(0, 40).forEach((p) => { const im = new Image(); im.src = PHOTO_URL(p.path); }); // preload so slides never pop in
     const shown = dishes.filter((d) => COURSES.includes(d.category) && !HIDDEN.includes(d.name.trim().toLowerCase()) && !/specialty/i.test(d.name));
-    data = { dishes: shown, signups: signups.filter((s) => shown.some((d) => d.id === s.dish_id)), rsvps, thanks };
+    data = { dishes: shown, signups: signups.filter((s) => shown.some((d) => d.id === s.dish_id)), rsvps, thanks, photos };
     build();
   } catch { setTimeout(load, 10000); }
 }
@@ -64,13 +67,18 @@ function slides() {
     if (d.locked) return `<div class="row"><span class="nm">${esc(pretty(d.name))}</span><span class="lead"></span><span class="who">${esc(HOST_COOK(d))}</span></div>`;
     return s.length ? `<div class="row"><span class="nm">${esc(pretty(d.name))}</span><span class="lead"></span><span class="who">${groupWho(s)}</span></div>` : '';
   }).filter(Boolean);
-  for (let i = 0; i < rows.length; i += 16) {
-    const chunk = rows.slice(i, i + 16);
-    out.push({ kind: 'menu', html: `<p class="kicker">What’s on the table${rows.length > 16 ? (i ? ', continued' : '') : ''}</p><h2>The Menu</h2>
-      <div class="menu ${chunk.length <= 6 ? 'one' : ''}">${chunk.join('')}</div>` });
+  // up to 12 dishes per slide (two columns of six) so it always fits a 720p screen
+  for (let i = 0, k = 0; i < rows.length; i += 12, k++) {
+    const chunk = rows.slice(i, i + 12);
+    out.push({ kind: 'menu', id: 'menu' + k, html: `<div class="menu-slide"><p class="kicker">What’s on the table${k ? ', continued' : ''}</p><h2>The Menu</h2>
+      <div class="menu ${chunk.length <= 5 ? 'one' : ''}">${chunk.join('')}</div></div>` });
   }
-  thanks.slice(0, 24).forEach((t) => out.push({ kind: 'quote', id: t.id, html: `<p class="kicker">Thankful for</p>
+  // photos and notes take turns so neither crowds out the other
+  const notes = thanks.slice(0, 24).map((t) => ({ kind: 'quote', id: t.id, html: `<p class="kicker">Thankful for</p>
     <blockquote class="quote ${t.body.length > 70 ? 'long' : ''}">${esc(t.body)}</blockquote><p class="caps by">${t.who ? esc(t.who) : 'Anonymous'}</p>` }));
+  const pics = data.photos.slice(0, 40).map((p) => ({ kind: 'photo', id: p.id, html: `<figure class="photo"><img src="${esc(PHOTO_URL(p.path))}" alt="">
+    <figcaption>${p.caption ? `<span class="cap">${esc(p.caption)}</span>` : ''}${p.who ? `<span class="caps">${esc(p.who)}</span>` : ''}</figcaption></figure>` }));
+  for (let i = 0; i < Math.max(notes.length, pics.length); i++) { if (pics[i]) out.push(pics[i]); if (notes[i]) out.push(notes[i]); }
   if (sky) out.push({ kind: 'weather', html: `<p class="kicker">Outside today</p><h2>${cap(sky.text)}</h2>
     <p class="big">A high of ${sky.hi}° and a low of ${sky.lo}°${sky.now != null && days === 0 ? `, ${sky.now}° right now` : ''}</p><p class="soft">Wilmington, Massachusetts</p>` });
   return out;
@@ -115,7 +123,7 @@ function note(msg) {
   clearTimeout(noteT); noteT = setTimeout(() => n.classList.remove('show'), 6000);
 }
 let reloadT;
-live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks'], ({ table, type, record }) => {
+live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks', 'tg_photos'], ({ table, type, record }) => {
   clearTimeout(reloadT); reloadT = setTimeout(load, 300);
   if (type !== 'INSERT') return;
   if (table === 'tg_signups') {
@@ -123,7 +131,8 @@ live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks'], ({ table, type, recor
     note(`${record.who} is bringing ${d ? pretty(d.name).toLowerCase() : 'a dish'}`);
   } else if (table === 'tg_rsvps') note(`${record.family} just joined the table`);
   else if (table === 'tg_thanks') { jumpTo = record.id; note('A new note of thanks'); }
-}, (up) => $('live').classList.toggle('up', up));
+  else if (table === 'tg_photos') { jumpTo = record.id; note(record.who ? `A new photo from ${record.who}` : 'A new photo'); }
+}, { onStatus: (up) => $('live').classList.toggle('up', up), presence: { kind: 'tv' } });
 setInterval(load, 5 * 60e3);
 setInterval(weather, 30 * 60e3);
 
@@ -146,6 +155,16 @@ $('start').addEventListener('click', () => {
 });
 let idleT;
 document.addEventListener('mousemove', () => { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => document.body.classList.add('idle'), 2500); });
+
+/* ---------- QR code: scan to add a photo or a note ---------- */
+(function qr() {
+  const url = new URL('add.html', location.href).href;
+  const q = qrcode(0, 'M'); q.addData(url); q.make();
+  const n = q.getModuleCount(), m = 4; // quiet zone
+  let d = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c + m} ${r + m}h1v1h-1z`;
+  $('qr').innerHTML = `<svg viewBox="0 0 ${n + m * 2} ${n + m * 2}" shape-rendering="crispEdges" aria-label="QR code to add a photo or note"><rect width="100%" height="100%" fill="#fffdf8"/><path d="${d}" fill="#2a1f17"/></svg>`;
+})();
 
 load();
 weather();

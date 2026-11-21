@@ -15,6 +15,9 @@ Design: a printed menu card. Cormorant Garamond + EB Garamond, cream paper, brow
 - Live updates over Supabase Realtime (`live.js`, no library): sign-ups appear instantly with a "just signed up" note
 - TV mode (`tv.html`): a slow, live slideshow for the big screen on Thursday — the invitation, who's here, the menu, each thankful note, the forecast. Tap to start (full screen, keeps the screen awake); arrow keys move between slides
 
-Shared settings live in `config.js`. Data lives in Supabase (`tg_dishes`, `tg_signups`, `tg_rsvps`, `tg_thanks`) and refreshes every few seconds.
+- Scan-to-add: TV mode shows a QR code to `add.html`, where guests post a photo (resized on the phone, location data stripped) or a thankful note; it appears on the TV within a second. Photos live in the public `tg-photos` storage bucket (images only, 5 MB max) and the `tg_photos` table
+- Presence: the countdown line shows how many others are on the page; opening a dish shows "Someone is signing up for this…" to everyone else
+
+Shared settings live in `config.js`. `qrcode.js` is qrcode-generator 1.4.4 (MIT). Data lives in Supabase (`tg_dishes`, `tg_signups`, `tg_rsvps`, `tg_thanks`) and refreshes every few seconds.
 
 Plain static HTML/CSS/JS, no build step. Hosted on GitHub Pages from the repo root.
