@@ -27,7 +27,7 @@ function table(name) {
   };
   return {
     list: (order) => run('GET', `select=*&order=${order}`),
-    insert: (row) => run('POST', '', row),
+    insert: (row) => { lastWrite = Date.now(); return run('POST', '', row); },
     update: (row, filter) => run('PATCH', filter, row),
     remove: (filter) => run('DELETE', filter),
   };
@@ -49,7 +49,8 @@ const word = (n) => WORDS[n] ?? String(n);
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const pretty = (s) => String(s ?? '').replace(/'/g, '’');
 
-let dishes = [], signups = [], rsvps = [], thanks = [], loadedOnce = false;
+let dishes = [], signups = [], rsvps = [], thanks = [], loadedOnce = false, lastWrite = 0;
+const seen = { s: new Set(), r: new Set() }; // ids already shown, so new ones can fade in like fresh ink
 
 /* ---------- Eastern-time date helpers ---------- */
 function etToday() {
@@ -71,7 +72,7 @@ async function load() {
     if (!loadedOnce) $('cats').innerHTML = '<p class="loading">Couldn’t reach the sign-up sheet. Try refreshing in a moment.</p>';
     return;
   }
-  const first = !loadedOnce; loadedOnce = true;
+  const first = !loadedOnce; loadedOnce = true; lastLoad = Date.now();
   dishes = a.data.filter((d) => (d.category === 'host' || COURSES.some((c) => c[0] === d.category)) && !HIDDEN.includes(d.name.trim().toLowerCase()));
   signups = b.data.filter((s) => dishes.some((d) => d.id === s.dish_id));
   if (c.data) rsvps = c.data;
@@ -80,10 +81,23 @@ async function load() {
 }
 let reloadT;
 const reloadSoon = () => { clearTimeout(reloadT); reloadT = setTimeout(load, 250); };
-setInterval(() => { if (!document.hidden && !$('dlg').open) load(); }, 12000);
+// Polling is the fallback; with the live connection up, a slow safety refresh is enough.
+let lastLoad = 0;
+setInterval(() => {
+  if (document.hidden || $('dlg').open) return;
+  if (feed && feed.connected() && Date.now() - lastLoad < 120e3) return;
+  load();
+}, 12000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) reloadSoon(); });
 
 function renderAll(animate = false) {
+  const freshS = animate ? [] : signups.filter((x) => !seen.s.has(x.id)).map((x) => x.dish_id);
+  const freshR = animate ? [] : rsvps.filter((x) => !seen.r.has(x.id)).map((x) => x.id);
+  signups.forEach((x) => seen.s.add(x.id)); rsvps.forEach((x) => seen.r.add(x.id));
+  setTimeout(() => {
+    freshS.forEach((id) => document.querySelectorAll(`.dish-row[data-dish="${id}"]`).forEach(ink));
+    freshR.forEach((id) => document.querySelectorAll(`.pc[data-r="${id}"], .ledger [data-r="${id}"]`).forEach(ink));
+  });
   renderMeter(animate);
   renderMenu();
   renderRsvps();
@@ -111,10 +125,10 @@ function renderMeter(animate) {
     ? `<p class="needed"><span class="caps">Still needed</span>${shown.map((d, i) =>
         `${i ? (i === shown.length - 1 && !more ? ' and ' : ', ') : ''}<button type="button" data-dish="${d.id}">${esc(pretty(d.name).toLowerCase())}</button>`).join('')}${more ? `, and ${spell(more)} more` : ''}</p>`
     : `<p class="needed done"><span class="caps">Still needed</span>Nothing. The table is set.</p>`;
-  const cards = rsvps.map((r, i) => `<li class="pc" style="--i:${i}"><b>${esc(r.family)}</b><span>party of ${r.adults + r.kids}</span></li>`).join('')
+  const cards = rsvps.map((r, i) => `<li class="pc" data-r="${r.id}" style="--i:${i}"><b>${esc(r.family)}</b><span>party of ${r.adults + r.kids}</span></li>`).join('')
     + `<li class="pc empty" style="--i:${rsvps.length}"><a href="#rsvpBlock"><b>${rsvps.length ? 'Your name?' : 'Be the first'}</b><span>RSVP below</span></a></li>`;
   $('meter').classList.toggle('animate', !!animate && !reduced);
-  $('meter').innerHTML = `${head}${need}<ul class="cards">${cards}</ul>`;
+  $('meter').innerHTML = `${head}${need}<ul class="cards">${cards}</ul><p class="live status-live" id="statusLive" ${feed && feed.connected() ? '' : 'hidden'}><span class="dot"></span>Updating live</p>`;
 }
 $('meter').addEventListener('click', (e) => {
   const b = e.target.closest('[data-dish]');
@@ -469,6 +483,18 @@ $('title').addEventListener('click', () => {
   gobbleSound();
   toast(GOBBLES[gob++ % GOBBLES.length]);
 });
+
+/* ---------- live updates ---------- */
+function ink(el) { el.classList.remove('fresh'); void el.offsetWidth; el.classList.add('fresh'); }
+const feed = live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks'], ({ table, type, record }) => {
+  reloadSoon();
+  if (type !== 'INSERT' || Date.now() - lastWrite < 5000) return;
+  if (table === 'tg_signups') {
+    const d = dishes.find((x) => x.id === record.dish_id);
+    toast(`${record.who} just signed up for ${d ? pretty(d.name).toLowerCase() : 'a dish'}.`);
+  } else if (table === 'tg_rsvps') toast(`${record.family} just RSVP’d.`);
+  else if (table === 'tg_thanks') toast('Someone just added what they’re thankful for.');
+}, (up) => { const el = $('statusLive'); if (el) el.hidden = !up; });
 
 /* ---------- go ---------- */
 renderDate();

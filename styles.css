@@ -90,6 +90,14 @@ h2 { margin: 0; font: 500 2.5rem/1.05 var(--display); color: var(--ink); }
 .pan-note { margin: 0 0 8px; padding: 12px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); font-size: .95rem; color: var(--ink-2); text-align: center; }
 .pan-note .caps { color: var(--cran); margin-right: .5em; }
 
+/* fresh ink: something that just changed fades in */
+.fresh { animation: ink 2.4s ease-out; }
+@keyframes ink { 0% { background: rgba(176,129,47,.28); } 100% { background: transparent; } }
+.dish-row.fresh .who, .pc.fresh b { animation: inkText 1.2s ease-out; }
+@keyframes inkText { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
+.status-live { margin: 18px 0 0; }
+@media (prefers-reduced-motion: reduce) { .fresh, .dish-row.fresh .who, .pc.fresh b { animation: none; } }
+
 /* ---------- the menu ---------- */
 .course { margin-top: 34px; }
 .course-head { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
