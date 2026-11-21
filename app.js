@@ -9,7 +9,8 @@ const COURSES = [
   ['desserts', 'Pies & Desserts', 'Room for about six'],
   ['extras', 'Something Else', 'Not needed, but bring it if you’d like to get creative'],
 ];
-const PAN_CATS = ['sides', 'desserts'];
+const NEED_CATS = ['sides', 'desserts']; // courses that count toward "covered"
+const NO_PAN = /gravy|cranberr|roll|bread/i; // sides that don't go in a chafing dish
 const HOST_COOK = (d) => /tourti/i.test(d.name) ? 'Sammy' : 'Danny &amp; Barb'; // who makes each host dish
 const HIDDEN = ['homemade noodles']; // removed from the menu; rows still in the database
 
@@ -90,7 +91,7 @@ function renderAll(animate = false) {
   checkFullHouse();
 }
 const signsFor = (d) => signups.filter((s) => s.dish_id === d.id);
-const courseNeeds = () => dishes.filter((x) => !x.locked && x.target && PAN_CATS.includes(x.category));
+const courseNeeds = () => dishes.filter((x) => !x.locked && x.target && NEED_CATS.includes(x.category));
 
 /* ---------- the status: who's at the table, what's still needed ---------- */
 const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];
@@ -173,7 +174,8 @@ function openDialog(title, body, actions) {
 dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
 const field = (label, id, value = '', ph = '', required = false, max = 40) =>
   `<label class="line"><span class="caps">${label}</span><input id="${id}" maxlength="${max}" value="${esc(value)}" placeholder="${esc(ph)}" ${required ? 'required' : ''}></label>`;
-const panTip = (cat) => PAN_CATS.includes(cat) ? '<p class="dlg-note" style="margin:14px 0 0">Please bring it in an aluminum pan, about 10″ × 12″, so it fits the chafing dishes.</p>' : '';
+const PAN_NOTE = (lead) => `<p class="dlg-note" style="margin:14px 0 0">${lead} an aluminum pan, about 10″ × 12″, so it fits the chafing dishes.</p>`;
+const panTip = (d) => d.category === 'sides' && !NO_PAN.test(d.name) ? PAN_NOTE('Please bring it in') : '';
 
 async function dishDialog(d) {
   if (!d) return;
@@ -188,7 +190,7 @@ async function dishDialog(d) {
      ${n ? `<ul class="dlg-who">${s.map((x) => `<li><button type="button" data-s="${x.id}"><b>${esc(x.who)}</b><i>${esc(x.note || '')}</i><span class="edit">Edit</span></button></li>`).join('')}</ul>` : ''}
      <div class="dlg-fields">${field('Your name', 'dName', myName(), 'e.g. Jeff & Sue', true)}
        <div class="stepper qty"><span class="caps">How many</span><button type="button" data-q="-1" aria-label="Fewer">−</button><output id="dQty">1</output><button type="button" data-q="1" aria-label="More">+</button></div>
-       ${field('Note', 'dNote', '', 'optional, e.g. homemade', false, 80)}</div>${panTip(d.category)}`, acts);
+       ${field('Note', 'dNote', '', 'optional, e.g. homemade', false, 80)}</div>${panTip(d)}`, acts);
   $('dlgBody').querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => { edit = b.dataset.s; dlg.close(); }));
   const okBtn = $('dlgActions').querySelector('button:last-child'), okLabel = okBtn.textContent;
   $('dlgBody').querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => {
@@ -234,7 +236,7 @@ async function addDishDialog(cat) {
   const course = COURSES.find((c) => c[0] === cat);
   const r = await openDialog(`Add to ${course[1]}`,
     `<div class="dlg-fields">${field('Dish', 'dItem', '', 'e.g. Deviled eggs', true, 60)}${field('Your name', 'dName', myName(), '', true)}${field('Note', 'dNote', '', 'optional', false, 80)}
-     <label class="check"><input type="checkbox" id="dMine" checked> I’m bringing it</label></div>${panTip(cat)}`,
+     <label class="check"><input type="checkbox" id="dMine" checked> I’m bringing it</label></div>${cat === 'sides' ? PAN_NOTE('If it’s a hot dish, please bring it in') : ''}`,
     [{ label: 'Cancel', value: null, cls: 'ghost' }, { label: 'Add to menu', value: 'ok', submit: true }]);
   if (r !== 'ok') return;
   const name = $('dItem').value.trim(), who = $('dName').value.trim(), note = $('dNote').value.trim() || null, mine = $('dMine').checked;
