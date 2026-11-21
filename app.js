@@ -175,18 +175,51 @@ $('cats').addEventListener('click', (e) => {
 
 /* ---------- dialogs ---------- */
 const dlg = $('dlg');
+// Smooth page transitions (View Transitions API): the tapped row grows into the dialog,
+// and closing sets it back down onto the row. Browsers without support just open and close.
+const canMorph = () => !!document.startViewTransition && !reduced;
+let tapped = null, tappedAt = 0;
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('.dish-row, .ledger button, .needed [data-dish]');
+  if (el) { tapped = el; tappedAt = Date.now(); }
+}, true);
+let morphFrom = null;
+function morph(from, to, change) {
+  if (!canMorph() || !from || !from.isConnected) return change();
+  from.style.viewTransitionName = 'card';
+  dlg.classList.add('morphing');
+  const t = document.startViewTransition(() => { from.style.viewTransitionName = ''; to.style.viewTransitionName = 'card'; change(); });
+  t.finished.finally(() => { to.style.viewTransitionName = ''; });
+}
 function openDialog(title, body, actions) {
   $('dlgTitle').textContent = title;
   $('dlgBody').innerHTML = body;
   $('dlgActions').innerHTML = actions.map((a, i) => `<button value="${i}" class="btn ${a.cls || ''}" ${a.submit ? '' : 'formnovalidate'}>${esc(a.label)}</button>`).join('');
+  morphFrom = Date.now() - tappedAt < 600 ? tapped : null;
   return new Promise((res) => {
     dlg.onclose = () => { const a = actions[+dlg.returnValue]; res(a ? a.value : null); dlg.returnValue = ''; };
-    dlg.showModal();
-    const f = dlg.querySelector('input:not([type=checkbox]), textarea');
-    if (f && !f.value && !touch) f.focus(); else dlg.querySelector('h3').focus?.();
+    const open = () => {
+      dlg.showModal();
+      const f = dlg.querySelector('input:not([type=checkbox]), textarea');
+      if (f && !f.value && !touch) f.focus(); else dlg.querySelector('h3').focus?.();
+    };
+    if (morphFrom) {
+      morph(morphFrom, dlg, open);
+    } else open();
   });
 }
+// Close through the same morph, so the box shrinks back into the row it came from.
+$('dlgForm').addEventListener('submit', (e) => {
+  if (!morphFrom || !canMorph() || !morphFrom.isConnected) return; // native close
+  e.preventDefault();
+  const value = e.submitter ? e.submitter.value : '';
+  const from = morphFrom; morphFrom = null;
+  dlg.style.viewTransitionName = 'card';
+  const t = document.startViewTransition(() => { dlg.style.viewTransitionName = ''; from.style.viewTransitionName = 'card'; dlg.close(value); });
+  t.finished.finally(() => { from.style.viewTransitionName = ''; });
+});
 dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+dlg.addEventListener('close', () => dlg.classList.remove('morphing')); // keep the plain fade-in from replaying after a morph
 const field = (label, id, value = '', ph = '', required = false, max = 40) =>
   `<label class="line"><span class="caps">${label}</span><input id="${id}" maxlength="${max}" value="${esc(value)}" placeholder="${esc(ph)}" ${required ? 'required' : ''}></label>`;
 const PAN_NOTE = (lead) => `<p class="dlg-note" style="margin:14px 0 0">${lead} an aluminum pan, about 10″ × 12″, so it fits the chafing dishes.</p>`;
