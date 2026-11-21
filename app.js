@@ -396,7 +396,7 @@ $('thanksForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const body = $('tBody').value.trim();
   if (!body) return;
-  const { data, error } = await T_THANKS.insert({ body, who: $('tWho').value.trim() || null });
+  const { data, error } = await T_THANKS.insert({ body, who: $('tWho').value.trim() || null, owner_hash: await fingerprint(deviceKey()) });
   if (error || !data.length) return toast('That didn’t save. Please try again.');
   store.set('tgMine', JSON.stringify([...myThanks(), data[0].id]));
   $('tBody').value = ''; grow();
@@ -406,7 +406,8 @@ $('thanksForm').addEventListener('submit', async (e) => {
 $('thanksWall').addEventListener('click', async (e) => {
   const b = e.target.closest('[data-t]');
   if (!b) return;
-  await T_THANKS.remove(byId(b.dataset.t));
+  const ok = await removeItem('note', b.dataset.t);
+  toast(ok ? 'Removed.' : 'That one can’t be removed from this phone.');
   load();
 });
 if (myName()) $('tWho').value = myName();

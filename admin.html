@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hosts · Beaudoin Thanksgiving</title>
+<meta name="theme-color" content="#f4ede0">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="apple-touch-icon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=28">
+</head>
+<body class="admin-page">
+<header class="hero">
+  <div class="invite">
+    <p class="eyebrow">The Beaudoin Family</p>
+    <h1>For the hosts</h1>
+    <p class="where" id="adminStatus">Checking this phone…</p>
+  </div>
+</header>
+
+<main id="adminMain" hidden>
+  <section class="block">
+    <header class="sec-head"><h2>Photos</h2><p class="sub" id="photoCount"></p></header>
+    <ul class="admin-photos" id="photos"></ul>
+  </section>
+  <section class="block">
+    <header class="sec-head"><h2>Thankful notes</h2><p class="sub" id="noteCount"></p></header>
+    <ul class="admin-notes" id="notes"></ul>
+  </section>
+  <p class="admin-foot">Removing something takes it off the TV and the site right away. <button type="button" class="link" id="forget">Lock this phone</button></p>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="config.js?v=28"></script>
+<script src="live.js?v=23"></script>
+<script src="admin.js?v=1"></script>
+</body>
+</html>

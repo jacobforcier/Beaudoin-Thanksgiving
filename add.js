@@ -50,8 +50,11 @@ $('photoForm').addEventListener('submit', async (e) => {
       const path = `thursday/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
       const up = await fetch(`${SB_URL}/storage/v1/object/tg-photos/${path}`, { method: 'POST', headers: { ...H, 'Content-Type': 'image/jpeg' }, body: blob });
       if (!up.ok) throw new Error('upload ' + up.status);
-      const row = await fetch(`${SB_URL}/rest/v1/tg_photos`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ path, who, caption }) });
+      const row = await fetch(`${SB_URL}/rest/v1/tg_photos`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify({ path, who, caption, owner_hash: await fingerprint(deviceKey()) }) });
       if (!row.ok) throw new Error('row ' + row.status);
+      const [saved] = await row.json();
+      remember('photo', saved);
       sent.push(URL.createObjectURL(blob));
     } catch { /* keep going; report below */ }
   }
@@ -72,8 +75,11 @@ $('noteForm').addEventListener('submit', async (e) => {
   const body = $('tBody').value.trim();
   if (!body) return;
   const who = $('tWho').value.trim() || null;
-  const r = await fetch(`${SB_URL}/rest/v1/tg_thanks`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify({ body, who }) }).catch(() => null);
+  const r = await fetch(`${SB_URL}/rest/v1/tg_thanks`, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+    body: JSON.stringify({ body, who, owner_hash: await fingerprint(deviceKey()) }) }).catch(() => null);
   if (!r || !r.ok) return toast('That didn’t save. Please try again.');
+  const [saved] = await r.json().catch(() => [null]);
+  if (saved) remember('note', saved);
   if (who) store.set('tgName', who);
   $('tBody').value = ''; grow();
   celebrate({ who, quote: body, msg: 'Your words are on the TV.' });
@@ -95,3 +101,31 @@ $('doneAgain').addEventListener('click', () => {
   setTimeout(() => { $('done').hidden = true; }, 300);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+/* ---------- "Sent from this phone": take back anything posted by accident ---------- */
+const mine = () => { try { return JSON.parse(store.get('tgSent') || '[]'); } catch { return []; } };
+function remember(kind, row) {
+  if (!row || !row.id) return;
+  store.set('tgSent', JSON.stringify([{ kind, id: row.id, path: row.path || null, body: row.body || null }, ...mine()].slice(0, 60)));
+  renderMine();
+}
+function renderMine() {
+  const list = mine();
+  $('mine').hidden = !list.length;
+  $('mineList').innerHTML = list.map((m) => `<li data-id="${m.id}">${m.kind === 'photo'
+    ? `<img src="${SB_URL}/storage/v1/object/public/tg-photos/${m.path}" alt="">`
+    : `<span class="q">“${String(m.body).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))}”</span>`}
+    <button type="button" class="link" data-kind="${m.kind}" data-id="${m.id}">Remove</button></li>`).join('');
+}
+$('mineList').addEventListener('click', async (e) => {
+  const b = e.target.closest('button[data-id]');
+  if (!b) return;
+  if (!confirm(b.dataset.kind === 'photo' ? 'Take this photo off the TV?' : 'Take this note off the TV?')) return;
+  b.disabled = true; b.textContent = 'Removing…';
+  const ok = await removeItem(b.dataset.kind, b.dataset.id);
+  // if it's already gone (removed elsewhere), forget it too
+  store.set('tgSent', JSON.stringify(mine().filter((m) => m.id !== b.dataset.id)));
+  renderMine();
+  toast(ok ? 'Removed. It’s off the TV.' : 'Removed from this list.');
+});
+renderMine();
