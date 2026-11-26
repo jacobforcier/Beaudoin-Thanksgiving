@@ -641,13 +641,6 @@ function paintLooking() {
 }
 setInterval(paintLooking, 1500);
 
-/* ---------- on the day, thankful notes come before the menu ---------- */
-if (daysUntil() <= 0) {
-  $('menuBlock').before($('thanksBlock'));
-  const nav = $('jump'), t = nav.querySelector('a[href="#thanksBlock"]');
-  nav.prepend(t);
-}
-
 /* ---------- go ---------- */
 renderDate();
 setInterval(renderDate, 60e3);
