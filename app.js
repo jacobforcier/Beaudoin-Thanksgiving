@@ -121,7 +121,7 @@ function renderMeter(animate) {
   const need = dayOf
     ? `<div class="day-tiles">
         <a class="day-tile" href="add.html"><span class="caps">Photos</span><b>Add a photo</b><small>It goes right on the TV</small></a>
-        <a class="day-tile" href="#thanksBlock"><span class="caps">Giving thanks</span><b>What are you thankful for?</b><small>We’ll read a few at dinner</small></a>
+        <a class="day-tile" href="#thanksBlock"><span class="caps">Giving thanks</span><b>What are you thankful for?</b><small>It goes right on the TV</small></a>
       </div>`
     : needed.length
     ? `<p class="needed"><span class="caps">Still needed</span>${shown.map((d, i) =>
