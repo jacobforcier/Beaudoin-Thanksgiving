@@ -399,3 +399,6 @@ body.is-closed main > .block:not(#closed):not(#mine) { display: none; }
 .proc-card b { display: block; margin: 6px 0 4px; font: italic 500 1.45rem/1.2 var(--display); color: #2b2118; }
 .proc-card .pc-sub { display: block; font-style: italic; font-size: .95rem; color: #5a4a3a; }
 .proc-card .pc-read { display: inline-block; margin-top: 10px; font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--cran); border-bottom: 1px solid rgba(142,42,46,.4); padding-bottom: 2px; }
+
+.poll-block:has(.poll-card[hidden]) { display: none; }
+.poll-block .poll-card { margin-top: 0; }

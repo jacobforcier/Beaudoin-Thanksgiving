@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Homemade+Apple&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=40">
+<link rel="stylesheet" href="styles.css?v=41">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -55,7 +55,6 @@
   </div>
 
   <div class="status" id="meter" aria-live="polite"></div>
-  <div class="poll-card" id="pollCard" hidden></div>
   <a class="proc-card" href="proclamation.html">
     <span class="pc-kick">On this day in 1789</span>
     <b>George Washington proclaimed the first national Thanksgiving</b>
@@ -110,6 +109,10 @@
       <label class="line"><span class="caps">Signed</span><input id="tWho" maxlength="40" placeholder="optional"></label>
       <button class="btn" type="submit">Add it</button>
     </form>
+  </section>
+
+  <section class="block poll-block" id="pollBlock">
+    <div class="poll-card" id="pollCard" hidden></div>
   </section>
 
   <section class="block" id="weatherBlock">
