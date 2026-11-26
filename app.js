@@ -116,7 +116,14 @@ function renderMeter(animate) {
     ? `<p class="headline">${cap(spell(n))} at the table</p><p class="subline">and ${spell(onTable)} ${onTable === 1 ? 'dish' : 'dishes'} on it</p>`
     : `<p class="headline">Pull up a chair</p><p class="subline">${spell(onTable)} ${onTable === 1 ? 'dish' : 'dishes'} on the table so far</p>`;
   const shown = needed.slice(0, 6), more = needed.length - shown.length;
-  const need = needed.length
+  // On Thanksgiving Day the "still needed" line gives way to the photo wall and thankful notes.
+  const dayOf = daysUntil() <= 0;
+  const need = dayOf
+    ? `<div class="day-tiles">
+        <a class="day-tile" href="add.html"><span class="caps">Photos</span><b>Add a photo</b><small>It goes right on the TV</small></a>
+        <a class="day-tile" href="#thanksBlock"><span class="caps">Giving thanks</span><b>What are you thankful for?</b><small>We’ll read a few at dinner</small></a>
+      </div>`
+    : needed.length
     ? `<p class="needed"><span class="caps">Still needed</span>${shown.map((d, i) =>
         `${i ? (i === shown.length - 1 && !more ? ' and ' : ', ') : ''}<button type="button" data-dish="${d.id}">${esc(pretty(d.name).toLowerCase())}</button>`).join('')}${more ? `, and ${spell(more)} more` : ''}</p>`
     : `<p class="needed done"><span class="caps">Still needed</span>Nothing. The table is set.</p>`;
@@ -425,7 +432,7 @@ function renderDate() {
     + (hereNow > 0 ? ` · ${word(hereNow)} ${hereNow === 1 ? 'other' : 'others'} here now` : '');
   // one quiet line about the photo and thankful-note wall; on the day it speaks to people at the party
   const share = $('shareLine');
-  share.hidden = n < -1;
+  share.hidden = n <= 0; // on the day the photo and thanks tiles under the invitation do this job
   share.classList.toggle('today', n <= 0);
   share.innerHTML = n <= 0
     ? 'Share a photo or what you’re thankful for. It goes right on the TV. <a href="add.html">Add yours</a>'
@@ -633,6 +640,13 @@ function paintLooking() {
   });
 }
 setInterval(paintLooking, 1500);
+
+/* ---------- on the day, thankful notes come before the menu ---------- */
+if (daysUntil() <= 0) {
+  $('menuBlock').before($('thanksBlock'));
+  const nav = $('jump'), t = nav.querySelector('a[href="#thanksBlock"]');
+  nav.prepend(t);
+}
 
 /* ---------- go ---------- */
 renderDate();

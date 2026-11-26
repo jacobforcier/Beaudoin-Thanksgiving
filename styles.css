@@ -353,3 +353,13 @@ body.is-closed main > .block:not(#closed):not(#mine) { display: none; }
 .pack-other { margin: 6px 0 0; text-align: center; }
 .pack-other .link { font-size: .85rem; color: var(--ink-3); }
 .dlg-actions .pick-name { border-color: var(--rule); color: var(--ink); }
+
+/* ---------- Thanksgiving Day: photo + thanks tiles under the invitation ---------- */
+.day-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 22px 0 0; }
+.day-tile { display: flex; flex-direction: column; gap: 4px; padding: 18px 14px 16px; text-align: center; text-decoration: none; color: var(--ink);
+  background: var(--card); border: 1px solid var(--rule); outline: 1px solid var(--rule); outline-offset: -6px; box-shadow: 0 12px 24px -20px rgba(60,35,15,.6); transition: transform .15s, box-shadow .15s; }
+.day-tile:active { transform: translateY(1px); }
+.day-tile .caps { color: var(--cran); }
+.day-tile b { font: italic 500 1.55rem/1.15 var(--display); color: var(--cran); }
+.day-tile small { color: var(--ink-3); font-style: italic; font-size: .88rem; }
+@media (max-width: 400px) { .day-tile b { font-size: 1.35rem; } }
