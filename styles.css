@@ -335,3 +335,21 @@ body.is-closed main > .block:not(#closed):not(#mine) { display: none; }
 .photo-soon .soon-big { margin: 0; font: italic 500 1.7rem/1.2 var(--display); color: var(--cran); }
 .photo-soon .sub { margin-top: 6px; }
 .photo-soon[hidden], #photoForm[hidden] { display: none; }
+
+/* ---------- "Your list for today" ---------- */
+.list-link { margin: 10px 0 0; }
+.list-link[hidden] { display: none; }
+.pack-list { list-style: none; margin: 0 0 14px; padding: 0; border-top: 1px solid var(--rule); }
+.pack-list li { border-bottom: 1px solid var(--rule); }
+.pack { display: flex; gap: 12px; align-items: flex-start; padding: 12px 2px; cursor: pointer; }
+.pack input { flex: none; width: 22px; height: 22px; margin-top: 3px; accent-color: var(--cran); }
+.pack b { font-weight: 500; font-size: 1.15rem; }
+.pack em { font-style: normal; color: var(--ochre); font-size: .9em; }
+.pack small { display: block; color: var(--ink-3); font-style: italic; font-size: .9rem; }
+.pack input:checked + span b { text-decoration: line-through; text-decoration-color: var(--ochre); color: var(--ink-3); }
+.pack-where { margin-bottom: 4px; }
+.pack-where a { color: var(--cran); }
+.pack-bon { margin: 4px 0 0; text-align: center; font-size: 1.3rem; }
+.pack-other { margin: 6px 0 0; text-align: center; }
+.pack-other .link { font-size: .85rem; color: var(--ink-3); }
+.dlg-actions .pick-name { border-color: var(--rule); color: var(--ink); }

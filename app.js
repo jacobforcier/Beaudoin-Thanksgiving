@@ -72,6 +72,7 @@ async function load() {
   if (c.data) rsvps = c.data;
   if (t.data) thanks = t.data;
   renderAll(first);
+  if (first) setTimeout(() => maybeShowList(), 700);
 }
 let reloadT;
 const reloadSoon = () => { clearTimeout(reloadT); reloadT = setTimeout(load, 250); };
@@ -526,6 +527,79 @@ $('title').addEventListener('click', () => {
   gobbleSound();
   toast(GOBBLES[gob++ % GOBBLES.length]);
 });
+
+/* ---------- "Your list for today": what this person signed up to bring ---------- */
+const isToday = () => daysUntil() === 0;
+const norm = (s) => String(s || '').trim().toLowerCase();
+function listName() { return store.get('tgListName') || myName(); }
+function bringers() {
+  const m = new Map();
+  signups.forEach((s) => { const k = norm(s.who); if (k && !m.has(k)) m.set(k, s.who.trim()); });
+  return [...m.values()].sort((a, b) => a.localeCompare(b));
+}
+function myItems(name) {
+  const byDish = new Map();
+  signups.filter((s) => norm(s.who) === norm(name)).forEach((s) => {
+    const e = byDish.get(s.dish_id) || { n: 0, notes: [] };
+    e.n++; if (s.note) e.notes.push(s.note);
+    byDish.set(s.dish_id, e);
+  });
+  return [...byDish].map(([id, e]) => ({ d: dishes.find((x) => x.id === id), ...e })).filter((x) => x.d);
+}
+const packed = () => { try { return JSON.parse(store.get('tgPacked') || '[]'); } catch { return []; } };
+
+async function pickName() {
+  const names = bringers();
+  if (!names.length) return null;
+  // the dialog stacks its buttons bottom-up, so list them in reverse to read A to Z
+  const opts = [{ label: 'I’m not bringing anything', value: '—', cls: 'ghost' }, ...names.slice().reverse().map((n) => ({ label: n, value: n, cls: 'ghost pick-name' }))];
+  const r = await openDialog('Who’s bringing food?', '<p class="dlg-note">Pick the name you signed up under, and we’ll show you what you’re bringing today.</p>', opts);
+  if (r) store.set('tgListName', r);
+  return r;
+}
+
+async function showList(fromLink = false) {
+  let name = listName();
+  if (!name || !myItems(name).length) {
+    if (!fromLink && store.get('tgListName') === '—') return;
+    name = await pickName();
+    if (!name || name === '—') return;
+  }
+  const items = myItems(name);
+  if (!items.length) return fromLink && toast('Nothing on the menu under that name yet.');
+  const done = packed();
+  const rows = items.map(({ d, n, notes }) => `<li><label class="pack">
+      <input type="checkbox" data-pack="${d.id}" ${done.includes(d.id) ? 'checked' : ''}>
+      <span><b>${esc(pretty(d.name))}${n > 1 ? ` <em>×${n}</em>` : ''}</b>
+      ${[notes.join(', '), d.category === 'sides' && !NO_PAN.test(d.name) ? 'in an aluminum pan' : ''].filter(Boolean).map((x) => `<small>${esc(x)}</small>`).join('')}</span></label></li>`).join('');
+  const p = openDialog('Your list for today',
+    `<p class="dlg-note">${esc(name)}, here’s what you’re bringing. Tick things off as they go in the car.</p>
+     <ul class="pack-list">${rows}</ul>
+     <p class="dlg-note pack-where">Arrive at 1 pm · 1 Leonard Lane, Wilmington · <a href="${esc($('directions').href)}" target="_blank" rel="noopener">Directions</a></p>
+     <p class="bon pack-bon">Happy Thanksgiving!</p>
+     <p class="pack-other"><button type="button" class="link" id="notMe">Not ${esc(name)}?</button></p>`,
+    [{ label: 'Got it', value: 'ok', submit: true }]);
+  $('dlgBody').addEventListener('change', (e) => {
+    const c = e.target.closest('[data-pack]'); if (!c) return;
+    const s = new Set(packed()); c.checked ? s.add(c.dataset.pack) : s.delete(c.dataset.pack);
+    store.set('tgPacked', JSON.stringify([...s]));
+    if (items.every(({ d }) => s.has(d.id))) toast('All packed. See you at 1!');
+  });
+  let swap = false;
+  $('notMe').addEventListener('click', () => { swap = true; dlg.close(); });
+  await p;
+  if (swap) { store.set('tgListName', ''); const n = await pickName(); if (n && n !== '—') showList(true); }
+}
+function maybeShowList() {
+  if (!isToday()) return;
+  $('listLink').hidden = false;
+  // once per day, and only until the evening
+  const today = etToday(); const key = `${today.y}-${today.m}-${today.d}`;
+  if (store.get('tgListShown') === key || Date.now() > ARRIVE + 4 * 3600e3) return;
+  store.set('tgListShown', key);
+  showList();
+}
+$('listLink').addEventListener('click', () => showList(true));
 
 /* ---------- live updates ---------- */
 function ink(el) { el.classList.remove('fresh'); void el.offsetWidth; el.classList.add('fresh'); }
