@@ -382,3 +382,10 @@ body.is-closed main > .block:not(#closed):not(#mine) { display: none; }
 .pbar .plabel em { font-size: .8rem; color: var(--cran); margin-left: 4px; }
 .pbar .ppct { font-variant-numeric: lining-nums; font-weight: 600; }
 .pfoot { margin: 10px 0 0; font-style: italic; color: var(--ink-3); font-size: .88rem; }
+
+/* footer link to Washington's 1789 proclamation */
+.proc-link { margin: 0 auto 18px; max-width: 26em; font-size: .98rem; line-height: 1.45; }
+.proc-link a { color: var(--ink-2); text-decoration: none; font-style: italic; }
+.proc-link a span { color: var(--ochre); font-style: normal; margin-right: .2em; }
+.proc-link em { color: var(--cran); text-decoration: underline; text-decoration-color: rgba(142,42,46,.35); text-underline-offset: 3px; white-space: nowrap; }
+.proc-link a:hover em { text-decoration-color: var(--cran); }
