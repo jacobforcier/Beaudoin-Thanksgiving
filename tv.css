@@ -112,10 +112,9 @@ h2 { margin: 0; font: italic 500 calc(var(--u) * 7.5)/1.05 var(--display); color
 
 /* "Thanksgiving, so far" mosaic */
 .mosaic { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * .8); margin-top: calc(var(--u) * 1.4); }
-.mosaic img { flex: none; width: calc((100% - (var(--cols) - 1) * var(--u) * .8) / var(--cols)); }
 .slide:has(.tv-bars) h2, .slide:has(.mosaic) h2 { font-size: calc(var(--u) * 5.6); }
 .slide:has(.tv-bars) .soft { font-size: calc(var(--u) * 1.9); margin-top: calc(var(--u) * 1.2); }
-.mosaic img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #fffdf8; padding: calc(var(--u) * .35); border: 1px solid var(--rule); box-shadow: 0 1vh 2vh -1.5vh rgba(60,35,15,.6);
+.mosaic img { flex: none; width: calc((100% - (var(--cols) - 1) * var(--u) * .8) / var(--cols)); aspect-ratio: 1; object-fit: cover; background: #fffdf8; padding: calc(var(--u) * .35); border: 1px solid var(--rule); box-shadow: 0 1vh 2vh -1.5vh rgba(60,35,15,.6);
   transform: rotate(var(--r)); animation: tile .7s cubic-bezier(.2,1.3,.4,1) both; animation-delay: var(--d); }
 @keyframes tile { from { opacity: 0; transform: translateY(-2vh) rotate(calc(var(--r) * 4)) scale(.85); } }
 @media (prefers-reduced-motion: reduce) { .slide.on .photo .print img, .slide.dropin .photo, .mosaic img, .tv-bars .pbar i { animation: none; } }
