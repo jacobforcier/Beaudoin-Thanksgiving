@@ -168,3 +168,7 @@ $('mineList').addEventListener('click', async (e) => {
   toast(ok ? 'Removed. It’s off the TV.' : 'Removed from this list.');
 });
 renderMine();
+
+/* ---------- today's table poll, at the top (it's what the TV's QR code leads to) ---------- */
+const pollFeed = live([], () => {}, { onBroadcast: (ev) => { if (ev === 'vote') pollCard.refresh(); } });
+const pollCard = pollWidget($('pollCard'), (pl) => pollFeed.broadcast('vote', { poll: pl.id }));

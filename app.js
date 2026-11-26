@@ -622,11 +622,15 @@ const feed = live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks'], ({ table
   presence: { kind: 'page' },
   onPresence: (list) => { hereNow = list.filter((m) => m.kind === 'page' && m.key !== feed.me).length; renderDate(); },
   onBroadcast: (event, p) => {
+    if (event === 'vote') return poll && poll.refresh();
     if (!p.dish) return;
     if (event === 'looking') looking.set(p.dish, Date.now() + 7000); else looking.delete(p.dish);
     paintLooking();
   },
 });
+
+/* Table poll (Thanksgiving Day only) */
+const poll = typeof pollWidget === 'function' ? pollWidget($('pollCard'), (pl) => feed.broadcast('vote', { poll: pl.id })) : null;
 
 /* "Someone is signing up for this…" on any dish another visitor has open right now */
 const looking = new Map();

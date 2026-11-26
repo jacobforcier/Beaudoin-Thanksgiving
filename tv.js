@@ -8,7 +8,7 @@ const ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'ei
 const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 const spell = (n) => n < 20 ? ONES[n] : n < 100 ? TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '') : String(n);
 const COURSES = ['host', 'sides', 'desserts', 'extras'];
-const SECONDS = { title: 14, guests: 14, quote: 11, photo: 9 };
+const SECONDS = { title: 14, guests: 14, quote: 11, photo: 10, poll: 15, mosaic: 15 };
 const PHOTO_URL = (path) => `${SB_URL}/storage/v1/object/public/tg-photos/${path}`;
 
 const H = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
@@ -46,15 +46,49 @@ function slides() {
   // photos and notes take turns so neither crowds out the other
   const notes = thanks.slice(0, 24).map((t) => ({ kind: 'quote', id: t.id, html: `<p class="kicker">Thankful for</p>
     <blockquote class="quote ${t.body.length > 70 ? 'long' : ''}">${esc(t.body)}</blockquote><p class="caps by">${t.who ? esc(t.who) : 'Anonymous'}</p>` }));
-  const pics = data.photos.slice(0, 40).map((p) => ({ kind: 'photo', id: p.id, html: `<figure class="photo"><img src="${esc(PHOTO_URL(p.path))}" alt="">
+  const pics = data.photos.slice(0, 40).map((p, k) => ({ kind: 'photo', id: p.id, html: `<figure class="photo"><div class="print" style="--kx:${[-3, 3, -2, 2][k % 4]}%;--ky:${[-2, 2, 3, -3][k % 4]}%"><img src="${esc(PHOTO_URL(p.path))}" alt=""></div>
     <figcaption>${p.caption ? `<span class="cap">${esc(p.caption)}</span>` : ''}${p.who ? `<span class="caps">${esc(p.who)}</span>` : ''}</figcaption></figure>` }));
   if (!notes.length && !pics.length) out.push({ kind: 'quote', html: `<p class="kicker">Thankful for</p><h2>What are you thankful for?</h2><p class="soft">Scan the code in the corner to add a photo or a few words.</p>` });
-  for (let i = 0; i < Math.max(notes.length, pics.length); i++) { if (pics[i]) out.push(pics[i]); if (notes[i]) out.push(notes[i]); }
+  const mix = [];
+  for (let i = 0; i < Math.max(notes.length, pics.length); i++) { if (pics[i]) mix.push(pics[i]); if (notes[i]) mix.push(notes[i]); }
+  // weave in the table poll and, once there are a few photos, the "so far" mosaic
+  const pollSlide = (k) => pollState && { kind: 'poll', id: 'poll' + k, html: pollHtml() };
+  const mosaic = (k) => data.photos.length >= 3 && { kind: 'mosaic', id: 'mosaic' + k, html: mosaicHtml() };
+  let k = 0;
+  if (pollSlide(k)) out.push(pollSlide(k++));
+  mix.forEach((s, i) => {
+    out.push(s);
+    if ((i + 1) % 8 === 0 && mosaic(i)) out.push(mosaic(i));
+    else if ((i + 1) % 4 === 0 && pollSlide(k)) out.push(pollSlide(k++));
+  });
+  if (mix.length % 8 !== 0 && mosaic('end')) out.push(mosaic('end'));
   return out;
 }
 
+/* ---------- table poll + "so far" mosaic ---------- */
+let pollState = null;
+async function refreshPoll() {
+  if (typeof pollIsLive !== 'function' || !pollIsLive()) { pollState = null; return; }
+  const poll = activePoll();
+  pollState = { poll, res: await pollResults(poll) };
+  build();
+}
+function pollHtml() {
+  const { poll, res } = pollState;
+  return `<p class="kicker">Table poll</p><h2>${esc(poll.q)}</h2>
+    <div class="tv-bars">${pollBars(poll, res, null)}</div>
+    <p class="soft">${res.total ? `${res.total} ${res.total === 1 ? 'vote' : 'votes'} so far · ` : ''}Vote on your phone: scan the code in the corner</p>`;
+}
+function mosaicHtml() {
+  const ph = data.photos.slice(0, 30), n = ph.length;
+  const cols = Math.ceil(Math.sqrt(n * 1.9)), rows = Math.ceil(n / cols);
+  return `<p class="kicker">The day so far</p><h2>Thanksgiving, so far</h2>
+    <div class="mosaic" style="--cols:${cols};width:min(100%,calc(36vh * ${cols} / ${rows}))">
+    ${ph.map((p, i) => `<img src="${esc(PHOTO_URL(p.path))}" alt="" style="--d:${(i * 0.09).toFixed(2)}s;--r:${[-2, 1.5, -1, 2.5, 0][i % 5]}deg">`).join('')}</div>`;
+}
+
 /* ---------- the show ---------- */
-let deck = [], at = 0, timer, jumpTo = null;
+let deck = [], at = 0, timer, jumpTo = null, freshId = null;
 function build() {
   const keep = deck[at] && (deck[at].id || deck[at].kind);
   deck = slides();
@@ -70,6 +104,7 @@ function show(i) {
   const old = $('stage').querySelector('.slide.on');
   const el = document.createElement('section');
   el.className = 'slide'; el.innerHTML = deck[at].html;
+  if (deck[at].id && deck[at].id === freshId) { el.classList.add('dropin'); freshId = null; }
   $('stage').appendChild(el);
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on')));
   if (old) { old.classList.remove('on'); setTimeout(() => old.remove(), 1400); }
@@ -100,8 +135,9 @@ live(['tg_dishes', 'tg_signups', 'tg_rsvps', 'tg_thanks', 'tg_photos'], ({ table
     note(`${record.who} is bringing ${d ? pretty(d.name).toLowerCase() : 'a dish'}`);
   } else if (table === 'tg_rsvps') note(`${record.family} just joined the table`);
   else if (table === 'tg_thanks') { jumpTo = record.id; note('A new note of thanks'); }
-  else if (table === 'tg_photos') { jumpTo = record.id; note(record.who ? `A new photo from ${record.who}` : 'A new photo'); }
-}, { onStatus: (up) => $('live').classList.toggle('up', up), presence: { kind: 'tv' } });
+  else if (table === 'tg_photos') { jumpTo = freshId = record.id; note(record.who ? `A new photo from ${record.who}` : 'A new photo'); }
+}, { onStatus: (up) => $('live').classList.toggle('up', up), presence: { kind: 'tv' }, onBroadcast: (ev) => { if (ev === 'vote') refreshPoll(); } });
+setInterval(refreshPoll, 60e3);
 setInterval(load, 5 * 60e3);
 
 /* ---------- clock, controls, full screen, keep awake ---------- */
@@ -135,3 +171,4 @@ document.addEventListener('mousemove', () => { document.body.classList.remove('i
 })();
 
 load();
+refreshPoll();

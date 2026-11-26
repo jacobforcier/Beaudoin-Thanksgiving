@@ -83,7 +83,14 @@ h2 { margin: 0; font: italic 500 calc(var(--u) * 7.5)/1.05 var(--display); color
 
 /* photo slides */
 .photo { margin: 0; display: flex; flex-direction: column; align-items: center; max-height: 100%; }
-.photo img { max-width: 100%; max-height: calc(100vh - var(--u) * 36); object-fit: contain; background: #fffdf8; padding: calc(var(--u) * .8); border: 1px solid var(--rule); box-shadow: 0 2vh 4vh -3vh rgba(60,35,15,.7); }
+.photo .print { max-width: 100%; overflow: hidden; background: #fffdf8; padding: calc(var(--u) * .8); border: 1px solid var(--rule); box-shadow: 0 2vh 4vh -3vh rgba(60,35,15,.7); }
+.photo .print img { display: block; max-width: 100%; max-height: calc(100vh - var(--u) * 36); object-fit: contain; transform-origin: center; }
+/* slow documentary-style pan and zoom while the photo is on screen */
+.slide.on .photo .print img { animation: kenburns 11s ease-out forwards; }
+@keyframes kenburns { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.12) translate(var(--kx), var(--ky)); } }
+/* a brand-new photo lands like a print tossed onto the table */
+.slide.dropin .photo { animation: dropin 1.3s cubic-bezier(.2,1.25,.4,1) both; }
+@keyframes dropin { 0% { transform: translateY(-70vh) rotate(-9deg) scale(1.08); opacity: 0; } 55% { opacity: 1; } 100% { transform: translateY(0) rotate(-1.2deg); } }
 .photo figcaption { margin-top: calc(var(--u) * 1.6); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * .4); }
 .photo .cap { font: italic 500 calc(var(--u) * 3) var(--display); }
 
@@ -93,3 +100,22 @@ h2 { margin: 0; font: italic 500 calc(var(--u) * 7.5)/1.05 var(--display); color
 .scan p { margin: 0; display: flex; flex-direction: column; padding-right: calc(var(--u) * .6); }
 .scan b { font: italic 500 calc(var(--u) * 2.2) var(--display); color: var(--cran); }
 .scan span { font-size: calc(var(--u) * 1.05); font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); max-width: 11em; line-height: 1.35; }
+
+/* table poll on the TV */
+.tv-bars { width: min(100%, calc(var(--u) * 72)); margin-top: calc(var(--u) * 1.6); display: grid; gap: calc(var(--u) * 1); text-align: left; }
+.tv-bars .pbar { position: relative; display: flex; justify-content: space-between; padding: calc(var(--u) * .8) calc(var(--u) * 1.4); border: 1px solid var(--rule); background: #fffdf8; font-size: calc(var(--u) * 2.1); overflow: hidden; z-index: 0; }
+.tv-bars .pbar i { position: absolute; inset: 0 auto 0 0; background: rgba(176,129,47,.25); z-index: -1; animation: grow 1.4s cubic-bezier(.3,.9,.3,1) both; transform-origin: left; }
+.tv-bars .pbar.lead i { background: rgba(142,42,46,.2); }
+.tv-bars .pbar.lead .plabel { color: var(--cran); }
+.tv-bars .ppct { font-weight: 600; font-variant-numeric: lining-nums; }
+@keyframes grow { from { transform: scaleX(0); } }
+
+/* "Thanksgiving, so far" mosaic */
+.mosaic { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * .8); margin-top: calc(var(--u) * 1.4); }
+.mosaic img { flex: none; width: calc((100% - (var(--cols) - 1) * var(--u) * .8) / var(--cols)); }
+.slide:has(.tv-bars) h2, .slide:has(.mosaic) h2 { font-size: calc(var(--u) * 5.6); }
+.slide:has(.tv-bars) .soft { font-size: calc(var(--u) * 1.9); margin-top: calc(var(--u) * 1.2); }
+.mosaic img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #fffdf8; padding: calc(var(--u) * .35); border: 1px solid var(--rule); box-shadow: 0 1vh 2vh -1.5vh rgba(60,35,15,.6);
+  transform: rotate(var(--r)); animation: tile .7s cubic-bezier(.2,1.3,.4,1) both; animation-delay: var(--d); }
+@keyframes tile { from { opacity: 0; transform: translateY(-2vh) rotate(calc(var(--r) * 4)) scale(.85); } }
+@media (prefers-reduced-motion: reduce) { .slide.on .photo .print img, .slide.dropin .photo, .mosaic img, .tv-bars .pbar i { animation: none; } }

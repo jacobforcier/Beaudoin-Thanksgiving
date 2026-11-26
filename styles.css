@@ -363,3 +363,22 @@ body.is-closed main > .block:not(#closed):not(#mine) { display: none; }
 .day-tile b { font: italic 500 1.55rem/1.15 var(--display); color: var(--cran); }
 .day-tile small { color: var(--ink-3); font-style: italic; font-size: .88rem; }
 @media (max-width: 400px) { .day-tile b { font-size: 1.35rem; } }
+
+/* ---------- table poll card ---------- */
+.poll-card { margin: 22px auto 0; max-width: 640px; padding: 20px 18px 16px; text-align: center; background: var(--card); border: 1px solid var(--rule); outline: 1px solid var(--rule); outline-offset: -6px; box-shadow: 0 12px 24px -20px rgba(60,35,15,.6); }
+.poll-card[hidden] { display: none; }
+.add-poll { margin: 30px auto 0; }
+.pkick { color: var(--cran); margin: 0; }
+.pq { margin: 6px 0 14px; font: italic 500 1.9rem/1.15 var(--display); color: var(--ink); }
+.popts { display: grid; gap: 8px; }
+.popts .btn { width: 100%; justify-self: stretch; border-color: var(--rule); color: var(--ink); letter-spacing: .12em; }
+.popts .btn:hover { background: var(--paper-2); }
+.popts.small { display: block; margin-top: 8px; font-size: .9rem; }
+.popts.small .link { color: var(--ink-2); font-size: .9rem; }
+.pbars { display: grid; gap: 8px; text-align: left; }
+.pbar { position: relative; display: flex; justify-content: space-between; gap: 10px; padding: 9px 12px; border: 1px solid var(--rule); background: var(--paper); overflow: hidden; z-index: 0; }
+.pbar i { position: absolute; inset: 0 auto 0 0; background: rgba(176,129,47,.22); z-index: -1; transition: width .8s cubic-bezier(.3,.9,.3,1); }
+.pbar.lead i { background: rgba(142,42,46,.18); }
+.pbar .plabel em { font-size: .8rem; color: var(--cran); margin-left: 4px; }
+.pbar .ppct { font-variant-numeric: lining-nums; font-weight: 600; }
+.pfoot { margin: 10px 0 0; font-style: italic; color: var(--ink-3); font-size: .88rem; }
