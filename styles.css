@@ -389,3 +389,13 @@ body.is-closed main > .block:not(#closed):not(#mine) { display: none; }
 .proc-link a span { color: var(--ochre); font-style: normal; margin-right: .2em; }
 .proc-link em { color: var(--cran); text-decoration: underline; text-decoration-color: rgba(142,42,46,.35); text-underline-offset: 3px; white-space: nowrap; }
 .proc-link a:hover em { text-decoration-color: var(--cran); }
+
+/* proclamation card near the top: aged parchment, like a small broadside */
+.proc-card { display: block; max-width: 640px; margin: 22px auto 0; padding: 20px 22px 18px; text-align: center; text-decoration: none; color: #2b2118;
+  background: #f3e8cf radial-gradient(ellipse at 50% 0%, rgba(255,250,235,.8), transparent 70%);
+  border: 1px solid #cbb894; outline: 1px solid #cbb894; outline-offset: -7px; box-shadow: 0 14px 28px -22px rgba(70,45,15,.7); transition: transform .15s; }
+.proc-card:active { transform: translateY(1px); }
+.proc-card .pc-kick { display: block; font-size: .68rem; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: #a87c2e; }
+.proc-card b { display: block; margin: 6px 0 4px; font: italic 500 1.45rem/1.2 var(--display); color: #2b2118; }
+.proc-card .pc-sub { display: block; font-style: italic; font-size: .95rem; color: #5a4a3a; }
+.proc-card .pc-read { display: inline-block; margin-top: 10px; font-size: .72rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--cran); border-bottom: 1px solid rgba(142,42,46,.4); padding-bottom: 2px; }
